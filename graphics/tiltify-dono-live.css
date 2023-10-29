@@ -28,7 +28,8 @@ p {
     margin: 10px 0;
 }
 
-button {
+button,
+.btn {
     border: var(--main-color) solid;
     display: inline-block;
     padding: 8px 16px;
@@ -40,6 +41,7 @@ button {
     white-space: nowrap;
     background-color: white;
     font-family: inherit;
+    font-size: 1.5rem;
 }
 
 button:hover:enabled {
