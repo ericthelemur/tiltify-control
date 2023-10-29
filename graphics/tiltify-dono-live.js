@@ -13,22 +13,24 @@ function createElem(tag, classes = [], content = undefined, post_hook = undefine
     return elem;
 }
 
+// Display formats
+const displayCurrFormat = new Intl.NumberFormat(undefined, { style: 'currency', currency: nodecg.bundleConfig.displayCurrency });
+const baseCurrFormat = (curr) => new Intl.NumberFormat(undefined, { style: 'currency', currency: curr });
+const timeFormat = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "numeric" });
+const dateFormat = new Intl.DateTimeFormat(undefined, { day: "numeric", weekday: "short", month: "short" })
+
 // Fetch conversion rates
 var conversionRates = {};
 fetch(`https://api.freecurrencyapi.com/v1/latest?apikey=${nodecg.bundleConfig.conversionRateKey}&base_currency=${nodecg.bundleConfig.displayCurrency}`)
     .then((r) => r.json())
     .then((j) => conversionRates = j.data)
 
-// Display formats
-const displayFormat = new Intl.NumberFormat(undefined, { style: 'currency', currency: nodecg.bundleConfig.displayCurrency });
-const baseFormat = (curr) => new Intl.NumberFormat(undefined, { style: 'currency', currency: curr });
-
 // Format value for display
 function getAmount(currency, value) {
     const canConvert = conversionRates && currency in conversionRates;
     return [
-        baseFormat(currency).format(value),
-        canConvert ? displayFormat.format(value / conversionRates[currency]) : null
+        baseCurrFormat(currency).format(value),
+        canConvert ? displayCurrFormat.format(value / conversionRates[currency]) : null
     ]
 }
 
@@ -49,6 +51,7 @@ function read(dono) {
 const donoElem = document.getElementById("donations");
 const clearDonosElem = document.getElementById("clear-donations");
 const showReadElem = document.getElementById("show-read");
+const newestFirstElem = document.getElementById("newest");
 
 var existing = [];
 var donationRep = nodecg.Replicant("donations", "nodecg-tiltify");
@@ -61,6 +64,7 @@ function updateDonoList(newvalue = undefined) {
     var changed = false;
     var newdonos = [];
     var i = 0;
+    if (newestFirstElem.checked) newvalue = newvalue.slice().reverse();
     for (var dono of newvalue) {
         if (dono.read && !showReadElem.checked) continue;
         if (i >= 50) {
@@ -75,7 +79,7 @@ function updateDonoList(newvalue = undefined) {
         newexisting.push(dono.id);
         i++;
 
-        const button = createElem("button", [], dono.read ? "Mark as unread" : "Mark as read");
+        const button = createElem("button", [], undefined, (e) => e.innerHTML = `<i class='bi bi-envelope-${dono.read ? "" : "open-"}fill'></i> ${dono.read ? "Unr" : "R"}ead`);
         button.addEventListener("click", read(dono));
         if (changed) {
             button.disabled = true;
@@ -83,12 +87,18 @@ function updateDonoList(newvalue = undefined) {
         }
 
         const amount = getAmount(dono.amount.currency, dono.amount.value);
+        const date = new Date(dono.completed_at);
         newdonos.push(createElem("div", dono.read ? ["card", "read"] : ["card"], undefined, (e) => e.id = "dono-" + dono.id, [
             createElem("h2", ["title"], undefined, undefined, [
                 createElem("span", ["name"], dono.donor_name),
                 createElem("span", ["donated"], " donated "),
                 createElem("span", ["amount"], amount[0]),
-                createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : "")
+                createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
+                createElem("small", ["datetime"], undefined, undefined, [
+                    createElem("span", ["time"], timeFormat.format(date)),
+                    createElem("span", [], " "),
+                    createElem("span", ["date"], dateFormat.format(date))
+                ]),
             ]),
             createElem("p", ["message"], dono.donor_comment || "No Message"),
             button
@@ -112,5 +122,9 @@ clearDonosElem.addEventListener("click", () => {
 })
 
 showReadElem.addEventListener("input", (e) => {
+    updateDonoList();
+})
+
+newestFirstElem.addEventListener("input", (e) => {
     updateDonoList();
 })

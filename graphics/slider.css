@@ -17,7 +17,7 @@ input[type="checkbox"].toggle+label::before {
     content: "";
     width: 2em;
     height: 1em;
-    background-color: hsl(0, 80%, 90%);
+    background-color: lightgray;
     border-radius: 1em;
     margin-right: .25em;
     transition: background-color 200ms ease-in-out;
@@ -34,7 +34,7 @@ input[type="checkbox"].toggle+label::after {
     left: .2em;
     width: 1.8em;
     height: 1.8em;
-    background-color: hsl(0, 80%, 60%);
+    background-color: gray;
     color: white;
     border-radius: 1em;
     transition: background-color 200ms ease-in-out, transform 200ms ease-in-out;
@@ -45,13 +45,13 @@ input[type="checkbox"].toggle:focus+label::before {
 }
 
 input[type="checkbox"].toggle:checked+label::before {
-    background-color: hsl(100, 70%, 90%);
+    background-color: var(--faded-color);
 }
 
 input[type="checkbox"].toggle:checked+label::after {
     content: " ";
     transform: translateX(100%);
-    background-color: hsl(100, 70%, 60%);
+    background-color: var(--main-color);
 }
 
 input[type="checkbox"].toggle:disabled+label {
