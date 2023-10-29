@@ -3,6 +3,11 @@ body {
     font-family: 'Mulish', sans-serif;
 }
 
+.read {
+    --main-color: #ae69ce;
+    opacity: 50%;
+}
+
 .monospace {
     font-family: monospace;
 }

@@ -33,25 +33,40 @@ function getAmount(currency, value) {
 }
 
 function read(dono) {
-    return () => {
-        console.log("Reading", dono)
-        nodecg.sendMessageToBundle('mark-donation-as-read', 'nodecg-tiltify', dono);
+    if (!dono.read) {
+        return () => {
+            console.log("Reading", dono)
+            nodecg.sendMessageToBundle('mark-donation-as-read', 'nodecg-tiltify', dono);
+        }
+    } else {
+        return () => {
+            console.log("Unreading", dono)
+            dono.read = false;
+        }
     }
 }
+
+const donoElem = document.getElementById("donations");
+const clearDonosElem = document.getElementById("clear-donations");
+const showReadElem = document.getElementById("show-read");
 
 var existing = [];
 var donationRep = nodecg.Replicant("donations", "nodecg-tiltify");
 function updateDonoList(newvalue = undefined) {
     // This can be triggered with on change or generally
     if (newvalue === undefined) newvalue = donationRep.value;
-    var donoElem = document.getElementById("donations");
+    console.log("Updating", newvalue)
 
     var newexisting = [];
     var changed = false;
     var newdonos = [];
     var i = 0;
     for (var dono of newvalue) {
-        if (dono.read) continue;
+        if (dono.read && !showReadElem.checked) continue;
+        if (i >= 50) {
+            newdonos.push(createElem("p", [], "Too many donations, truncating here"));
+            break;
+        }
 
         // Track if element has moved, if so, disable buttons below for 1s
         if (existing[i] != dono.id) {
@@ -60,7 +75,7 @@ function updateDonoList(newvalue = undefined) {
         newexisting.push(dono.id);
         i++;
 
-        const button = createElem("button", [], "Mark as read");
+        const button = createElem("button", [], dono.read ? "Mark as unread" : "Mark as read");
         button.addEventListener("click", read(dono));
         if (changed) {
             button.disabled = true;
@@ -68,7 +83,7 @@ function updateDonoList(newvalue = undefined) {
         }
 
         const amount = getAmount(dono.amount.currency, dono.amount.value);
-        newdonos.push(createElem("div", ["card"], undefined, (e) => e.id = "dono-" + dono.id, [
+        newdonos.push(createElem("div", dono.read ? ["card", "read"] : ["card"], undefined, (e) => e.id = "dono-" + dono.id, [
             createElem("h2", ["title"], undefined, undefined, [
                 createElem("span", ["name"], dono.donor_name),
                 createElem("span", ["donated"], " donated "),
@@ -86,12 +101,16 @@ function updateDonoList(newvalue = undefined) {
 
 // Update dono list on donation coming in
 donationRep.on("change", function (newvalue, oldvalue) {
-    updateDonoList(newvalue)
+    updateDonoList(newvalue);
 });
 
-document.getElementById("clear-donations").addEventListener("click", (e) => {
+clearDonosElem.addEventListener("click", () => {
     var confirmClear = confirm("Are you sure you want to clear all donations for all readers?")
     if (confirmClear == true) {
         nodecg.sendMessageToBundle('clear-donations', 'nodecg-tiltify');
     }
+})
+
+showReadElem.addEventListener("input", (e) => {
+    updateDonoList();
 })
