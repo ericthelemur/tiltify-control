@@ -1,0 +1,64 @@
+{
+  "name": "tiltify-control",
+  "version": "0.0.0",
+  "description": "",
+  "homepage": "",
+  "author": {
+    "name": "ericthelemur",
+    "email": "owenconnors1@gmail.com",
+    "url": ""
+  },
+  "files": [
+    "dashboard",
+    "graphics",
+    "extension.js",
+    "extension"
+  ],
+  "keywords": [
+    "",
+    "nodecg-bundle"
+  ],
+  "nodecg": {
+    "bundleDependencies": {
+      "nodecg-tiltify": "~1.0.0"
+    },
+    "compatibleRange": "^1.9.0",
+    "dashboardPanels": [
+      {
+        "name": "tiltify-control",
+        "title": "Tiltify Control",
+        "width": 2,
+        "file": "tiltify-control.html",
+        "headerColor": "#525F78"
+      }
+    ],
+    "graphics": [
+      {
+        "file": "tiltify-dono-all.html",
+        "width": 1920,
+        "height": 1080,
+        "singleInstance": false
+      },
+      {
+        "file": "tiltify-dono-live.html",
+        "width": 1920,
+        "height": 1080,
+        "singleInstance": false
+      }
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "repository": "https://github.com/nodecg/nodecg.git",
+  "license": "MIT"
+}

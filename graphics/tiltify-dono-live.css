@@ -1,0 +1,43 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.monospace {
+    font-family: monospace;
+}
+
+.card {
+    transition: 0.3s;
+    margin: 10px;
+    padding: 16px 16px;
+    border: #009688 solid;
+    border-radius: 12px;
+}
+
+.card> :first-child {
+    margin-top: 0;
+}
+
+h2,
+p {
+    margin: 10px 0;
+}
+
+button {
+    border: none;
+    display: inline-block;
+    padding: 8px 16px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    color: #fff !important;
+    background-color: #009688 !important
+}
+
+.block {
+    display: block;
+    width: 100%;
+}

@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "displayCurrency": {
+            "description": "Currency you want amounts displayed in",
+            "type": "string",
+            "default": "GBP"
+        },
+        "conversionRateKey": {
+            "description": "API key for freecurrencyapi.com, used for uncommon currencies (avoids rate limiting)",
+            "type": "string",
+            "default": ""
+        }
+    }
+}
