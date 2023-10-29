@@ -5,7 +5,7 @@ function createElem(tag, classes = [], content = undefined, post_hook = undefine
     for (const c of classes) {
         elem.classList.add(c);
     }
-    if (content) elem.innerHTML = content;
+    if (content) elem.innerText = content;
     for (const ch of children) {
         elem.appendChild(ch);
     }
@@ -25,7 +25,6 @@ const baseFormat = (curr) => new Intl.NumberFormat(undefined, { style: 'currency
 
 // Format value for display
 function getAmount(currency, value) {
-    console.log(conversionRates);
     const canConvert = conversionRates && currency in conversionRates;
     return [
         baseFormat(currency).format(value),
@@ -33,26 +32,63 @@ function getAmount(currency, value) {
     ]
 }
 
-var donations = [];
+function read(dono) {
+    return () => {
+        console.log("Reading", dono)
+        nodecg.sendMessageToBundle('mark-donation-as-read', 'nodecg-tiltify', dono);
+    }
+}
+
+var existing = [];
 var donationRep = nodecg.Replicant("donations", "nodecg-tiltify");
-donationRep.on("change", function (newvalue, oldvalue) {
-    donations = newvalue;
+function updateDonoList(newvalue = undefined) {
+    // This can be triggered with on change or generally
+    if (newvalue === undefined) newvalue = donationRep.value;
     var donoElem = document.getElementById("donations");
 
+    var newexisting = [];
+    var changed = false;
     var newdonos = [];
+    var i = 0;
     for (var dono of newvalue) {
         if (dono.read) continue;
 
+        // Track if element has moved, if so, disable buttons below for 1s
+        if (existing[i] != dono.id) {
+            changed = true;
+        }
+        newexisting.push(dono.id);
+        i++;
+
+        const button = createElem("button", [], "Mark as read");
+        button.addEventListener("click", read(dono));
+        if (changed) {
+            button.disabled = true;
+            setTimeout(() => button.disabled = false, 1000);
+        }
+
         const amount = getAmount(dono.amount.currency, dono.amount.value);
         newdonos.push(createElem("div", ["card"], undefined, (e) => e.id = "dono-" + dono.id, [
-            createElem("h2", ["name"], `${dono.donor_name} donated ${amount[0]}` + (amount[1] ? ` (${amount[1]})` : "")),
+            createElem("h2", ["title"], undefined, undefined, [
+                createElem("span", ["name"], dono.donor_name),
+                createElem("span", ["donated"], " donated "),
+                createElem("span", ["amount"], amount[0]),
+                createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : "")
+            ]),
             createElem("p", ["message"], dono.donor_comment || "No Message"),
-            createElem("button", [], "Mark as read", (e) => e.addEventListener("click", () => nodecg.sendMessageToBundle('mark-donation-as-read', 'nodecg-tiltify', dono)))
-        ]))
+            button
+        ]));
     }
 
     donoElem.replaceChildren(...newdonos);
+    existing = newexisting;
+}
+
+// Update dono list on donation coming in
+donationRep.on("change", function (newvalue, oldvalue) {
+    updateDonoList(newvalue)
 });
+
 document.getElementById("clear-donations").addEventListener("click", (e) => {
     var confirmClear = confirm("Are you sure you want to clear all donations for all readers?")
     if (confirmClear == true) {
