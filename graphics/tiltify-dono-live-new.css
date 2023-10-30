@@ -63,4 +63,11 @@ h2 {
 .btn-outline-primary {
     --bs-btn-disabled-border-color: gray !important;
     --bs-btn-disabled-color: gray !important;
+
+    --bs-btn-hover-bg: var(--bs-primary-border-subtle);
+    --bs-btn-hover-color: var(--bs-primary);
+}
+
+.bi:first-child {
+    margin-right: 0.3em;
 }

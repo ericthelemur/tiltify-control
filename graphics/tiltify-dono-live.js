@@ -42,6 +42,10 @@ function read(dono) {
     }
 }
 
+function approve(dono) {
+    return () => dono.approved = !dono.approved;
+}
+
 const donoElem = document.getElementById("donations");
 const clearDonosElem = document.getElementById("clear-donations");
 const showReadElem = document.getElementById("show-read");
@@ -51,9 +55,15 @@ function moveKey(dono) {
     return { id: dono.id, read: dono.read }
 }
 
+function createIcon(icon) {
+    return createElem("i", ["bi", "bi-" + icon]);
+}
+
 function createButton(toggle, textTrue, iconTrue, textFalse, iconFalse, onclick = undefined) {
-    const button = createElem("button", ["btn", toggle ? "btn-primary" : "btn-outline-primary"]);
-    button.innerHTML = `<i class='bi bi-${toggle ? iconTrue : iconFalse}'></i> ${toggle ? textTrue : textFalse}`;
+    const button = createElem("button", ["btn", toggle ? "btn-primary" : "btn-outline-primary"], undefined, undefined, [
+        createIcon(toggle ? iconTrue : iconFalse),
+        createElem("span", undefined, toggle ? textTrue : textFalse)
+    ]);
     if (onclick) button.addEventListener("click", onclick);
     return button;
 }
@@ -84,11 +94,9 @@ function updateDonoList(newvalue = undefined) {
         newexisting.push(key);
         i++;
 
-        const btn1 = createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono));
-        const btn2 = createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono))
-
         const btnGroup = createElem("div", ["btn-group"], undefined, (e) => e.role = "group", [
-            btn1, btn2
+            createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono)),
+            createButton(!dono.approved, "Approve", "eye-fill", "Censor", "eye-slash-fill", approve(dono))
         ])
         if (changed) {
             [].forEach.call(btnGroup.children, (e) => e.disabled = true);
@@ -102,12 +110,14 @@ function updateDonoList(newvalue = undefined) {
         if (dono.read) cardClasses.push("read");
         newdonos.push(createElem("div", cardClasses, undefined, (e) => e.id = "dono-" + dono.id, [
             createElem("div", ["card-body"], undefined, undefined, [
-                createElem("h2", ["h5", "card-title"], undefined, undefined, [
-                    createElem("span", ["name"], dono.donor_name),
-                    createElem("span", ["donated"], " donated "),
-                    createElem("span", ["amount"], amount[0]),
-                    createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
-                ]),
+                createElem("h2", ["h5", "card-title"], undefined,
+                    (e) => { if (dono.seen) e.prepend(createIcon("eye-fill")) },
+                    [
+                        createElem("span", ["name"], dono.donor_name),
+                        createElem("span", ["donated"], " donated "),
+                        createElem("span", ["amount"], amount[0]),
+                        createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
+                    ]),
                 createElem("small", ["datetime", "card-subtitle", "text-black-50"], undefined, undefined, [
                     createElem("span", ["time"], timeFormat.format(date)),
                     createElem("span", [], " "),
