@@ -53,7 +53,12 @@ const clearDonosElem = document.getElementById("clear-donations");
 const showReadElem = document.getElementById("show-read");
 const newestFirstElem = document.getElementById("newest");
 
+function existingKey(dono) {
+    return [dono.id, dono.read]
+}
+
 var existing = [];
+var readMsg = [];
 var donationRep = nodecg.Replicant("donations", "nodecg-tiltify");
 function updateDonoList(newvalue = undefined) {
     // This can be triggered with on change or generally
@@ -61,7 +66,6 @@ function updateDonoList(newvalue = undefined) {
     console.log("Updating", newvalue)
 
     var newexisting = [];
-    var changed = false;
     var newdonos = [];
     var i = 0;
     if (newestFirstElem.checked) newvalue = newvalue.slice().reverse();
@@ -73,10 +77,10 @@ function updateDonoList(newvalue = undefined) {
         }
 
         // Track if element has moved, if so, disable buttons below for 1s
-        if (existing[i] != dono.id) {
-            changed = true;
-        }
-        newexisting.push(dono.id);
+        var newKey = existingKey(dono);
+        var currKey = existing[i];
+        const changed = currKey === undefined || newKey.some((v, j) => v !== currKey[j]);
+        newexisting.push(newKey);
         i++;
 
         const button = createElem("button", ["btn", dono.read ? "btn-outline-primary" : "btn-primary"]);
@@ -84,7 +88,7 @@ function updateDonoList(newvalue = undefined) {
         button.addEventListener("click", read(dono));
         if (changed) {
             button.disabled = true;
-            setTimeout(() => button.disabled = false, 1000);
+            setTimeout(() => button.disabled = false, 500);
         }
 
         const amount = getAmount(dono.amount.currency, dono.amount.value);
