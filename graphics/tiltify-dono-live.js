@@ -36,15 +36,9 @@ function getAmount(currency, value) {
 
 function read(dono) {
     if (!dono.read) {
-        return () => {
-            console.log("Reading", dono)
-            nodecg.sendMessageToBundle('mark-donation-as-read', 'nodecg-tiltify', dono);
-        }
+        return () => nodecg.sendMessageToBundle('mark-donation-as-read', 'nodecg-tiltify', dono);
     } else {
-        return () => {
-            console.log("Unreading", dono)
-            dono.read = false;
-        }
+        return () => dono.read = false;
     }
 }
 
@@ -53,8 +47,15 @@ const clearDonosElem = document.getElementById("clear-donations");
 const showReadElem = document.getElementById("show-read");
 const newestFirstElem = document.getElementById("newest");
 
-function existingKey(dono) {
-    return [dono.id, dono.read]
+function moveKey(dono) {
+    return { id: dono.id, read: dono.read }
+}
+
+function createButton(toggle, textTrue, iconTrue, textFalse, iconFalse, onclick = undefined) {
+    const button = createElem("button", ["btn", toggle ? "btn-primary" : "btn-outline-primary"]);
+    button.innerHTML = `<i class='bi bi-${toggle ? iconTrue : iconFalse}'></i> ${toggle ? textTrue : textFalse}`;
+    if (onclick) button.addEventListener("click", onclick);
+    return button;
 }
 
 var existing = [];
@@ -77,19 +78,23 @@ function updateDonoList(newvalue = undefined) {
         }
 
         // Track if element has moved, if so, disable buttons below for 1s
-        var newKey = existingKey(dono);
-        var currKey = existing[i];
-        const changed = currKey === undefined || newKey.some((v, j) => v !== currKey[j]);
-        newexisting.push(newKey);
+        const key = moveKey(dono);
+        console.log(key, existing[i])
+        const changed = JSON.stringify(key) !== JSON.stringify(existing[i]);
+        newexisting.push(key);
         i++;
 
-        const button = createElem("button", ["btn", dono.read ? "btn-outline-primary" : "btn-primary"]);
-        button.innerHTML = `<i class='bi bi-envelope-${dono.read ? "" : "open-"}fill'></i> ${dono.read ? "Unr" : "R"}ead`
-        button.addEventListener("click", read(dono));
+        const btn1 = createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono));
+        const btn2 = createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono))
+
+        const btnGroup = createElem("div", ["btn-group"], undefined, (e) => e.role = "group", [
+            btn1, btn2
+        ])
         if (changed) {
-            button.disabled = true;
-            setTimeout(() => button.disabled = false, 500);
+            [].forEach.call(btnGroup.children, (e) => e.disabled = true);
+            setTimeout(() => [].forEach.call(btnGroup.children, (e) => e.disabled = false), 500);
         }
+
 
         const amount = getAmount(dono.amount.currency, dono.amount.value);
         const date = new Date(dono.completed_at);
@@ -109,7 +114,7 @@ function updateDonoList(newvalue = undefined) {
                     createElem("span", ["date"], dateFormat.format(date))
                 ]),
                 createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
-                button
+                btnGroup
             ])
         ]));
     }

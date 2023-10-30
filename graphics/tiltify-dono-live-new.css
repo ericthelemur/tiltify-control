@@ -54,3 +54,13 @@ h2 {
     flex-direction: column;
     gap: 0.5em;
 }
+
+.btn-primary {
+    --bs-btn-disabled-border-color: gray !important;
+    --bs-btn-disabled-bg: gray !important;
+}
+
+.btn-outline-primary {
+    --bs-btn-disabled-border-color: gray !important;
+    --bs-btn-disabled-color: gray !important;
+}
