@@ -79,7 +79,8 @@ function updateDonoList(newvalue = undefined) {
         newexisting.push(dono.id);
         i++;
 
-        const button = createElem("button", [], undefined, (e) => e.innerHTML = `<i class='bi bi-envelope-${dono.read ? "" : "open-"}fill'></i> ${dono.read ? "Unr" : "R"}ead`);
+        const button = createElem("button", ["btn", dono.read ? "btn-outline-primary" : "btn-primary"]);
+        button.innerHTML = `<i class='bi bi-envelope-${dono.read ? "" : "open-"}fill'></i> ${dono.read ? "Unr" : "R"}ead`
         button.addEventListener("click", read(dono));
         if (changed) {
             button.disabled = true;
@@ -88,20 +89,24 @@ function updateDonoList(newvalue = undefined) {
 
         const amount = getAmount(dono.amount.currency, dono.amount.value);
         const date = new Date(dono.completed_at);
-        newdonos.push(createElem("div", dono.read ? ["card", "read"] : ["card"], undefined, (e) => e.id = "dono-" + dono.id, [
-            createElem("h2", ["title"], undefined, undefined, [
-                createElem("span", ["name"], dono.donor_name),
-                createElem("span", ["donated"], " donated "),
-                createElem("span", ["amount"], amount[0]),
-                createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
-                createElem("small", ["datetime"], undefined, undefined, [
+        const cardClasses = ["card"];
+        if (dono.read) cardClasses.push("read");
+        newdonos.push(createElem("div", cardClasses, undefined, (e) => e.id = "dono-" + dono.id, [
+            createElem("div", ["card-body"], undefined, undefined, [
+                createElem("h2", ["h5", "card-title"], undefined, undefined, [
+                    createElem("span", ["name"], dono.donor_name),
+                    createElem("span", ["donated"], " donated "),
+                    createElem("span", ["amount"], amount[0]),
+                    createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
+                ]),
+                createElem("small", ["datetime", "card-subtitle", "text-black-50"], undefined, undefined, [
                     createElem("span", ["time"], timeFormat.format(date)),
                     createElem("span", [], " "),
                     createElem("span", ["date"], dateFormat.format(date))
                 ]),
-            ]),
-            createElem("p", ["message"], dono.donor_comment || "No Message"),
-            button
+                createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
+                button
+            ])
         ]));
     }
 

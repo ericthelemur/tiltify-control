@@ -1,0 +1,39 @@
+h2 {
+    margin: 0;
+}
+
+.name,
+.amount:not(.amount-gbp) {
+    font-weight: bold;
+}
+
+
+#donations {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
+    gap: 0.5rem;
+}
+
+.card {
+    --bs-card-spacer-y: 0.5rem;
+    --bs-card-spacer-x: 0.75rem;
+    flex-grow: 1;
+}
+
+.read {
+    opacity: 0.5;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title {
+    margin-bottom: 0.25em;
+}
+
+.message {
+    line-height: 1.2;
+    flex-grow: 1;
+}

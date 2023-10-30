@@ -9,34 +9,29 @@
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Mulish:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="tiltify-dono-live.css">
-    <link rel="stylesheet" href="slider.css">
+    <link rel="stylesheet" href="uwcs-bootstrap.css">
+    <link rel="stylesheet" href="tiltify-dono-live-new.css">
 
 </head>
 
 <body>
     <details>
-        <summary class="btn"><i class="bi bi-gear-fill"></i> Open Settings</summary>
+        <summary class="btn btn-primary"><i class="bi bi-gear-fill"></i> Open Settings</summary>
         <div class="button-row">
-            <button id="clear-donations" role="button">Clear Donation Queue</button>
+            <button class="btn btn-primary" id="clear-donations" role="button">Clear Donation Queue</button>
 
-            <span class="btn">
-                <input type="checkbox" id="show-read" class="toggle">
-                <label for="show-read">Show Read</label>
+            <span class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="show-read">
+                <label class="form-check-label" for="show-read">Show Read</label>
             </span>
 
-            <span class="btn">
-                <input type="checkbox" id="see-all" class="toggle">
-                <label for="see-all">See All Donos</label>
-            </span>
-
-            <span class="btn">
-                <input type="checkbox" id="newest" class="toggle">
-                <label for="newest">Newest First</label>
+            <span class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="newest">
+                <label class="form-check-label" for="newest">Newest First</label>
             </span>
         </div>
     </details>
-    <div class="col-sm-12" id="donations">
+    <div class="m-3" id="donations">
     </div>
 </body>
 <script src="tiltify-dono-live.js"></script>
