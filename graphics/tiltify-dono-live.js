@@ -19,19 +19,13 @@ const baseCurrFormat = (curr) => new Intl.NumberFormat(undefined, { style: 'curr
 const timeFormat = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "numeric" });
 const dateFormat = new Intl.DateTimeFormat(undefined, { day: "numeric", weekday: "short", month: "short" })
 
-// Fetch conversion rates
-var conversionRates = {};
-fetch(`https://api.freecurrencyapi.com/v1/latest?apikey=${nodecg.bundleConfig.conversionRateKey}&base_currency=${nodecg.bundleConfig.displayCurrency}`)
-    .then((r) => r.json())
-    .then((j) => conversionRates = j.data)
-
 // Format value for display
-function getAmount(currency, value) {
-    const canConvert = conversionRates && currency in conversionRates;
-    return [
-        baseCurrFormat(currency).format(value),
-        canConvert ? displayCurrFormat.format(value / conversionRates[currency]) : null
-    ]
+function getAmount(currency, value, disp) {
+    const c1 = baseCurrFormat(currency).format(value);
+    if (currency == nodecg.bundleConfig.displayCurrency || disp === undefined) {
+        return [c1, undefined]
+    }
+    return [c1, displayCurrFormat.format(disp)]
 }
 
 function read(dono) {
@@ -104,7 +98,7 @@ function updateDonoList(newvalue = undefined) {
         }
 
 
-        const amount = getAmount(dono.amount.currency, dono.amount.value);
+        const amount = getAmount(dono.amount.currency, dono.amount.value, dono.amountDisplay);
         const date = new Date(dono.completed_at);
         const cardClasses = ["card"];
         if (dono.read) cardClasses.push("read");
