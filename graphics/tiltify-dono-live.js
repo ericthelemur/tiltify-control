@@ -13,6 +13,10 @@ function createElem(tag, classes = [], content = undefined, post_hook = undefine
     return elem;
 }
 
+// Replicants used
+var donationRep = nodecg.Replicant("donations", "nodecg-tiltify");
+var approvedDonationsRep = nodecg.Replicant("approvedDonations");
+
 // Display formats
 const displayCurrFormat = new Intl.NumberFormat(undefined, { style: 'currency', currency: nodecg.bundleConfig.displayCurrency });
 const baseCurrFormat = (curr) => new Intl.NumberFormat(undefined, { style: 'currency', currency: curr });
@@ -64,7 +68,6 @@ function createButton(toggle, textTrue, iconTrue, textFalse, iconFalse, onclick 
 
 var existing = [];
 var readMsg = [];
-var donationRep = nodecg.Replicant("donations", "nodecg-tiltify");
 function updateDonoList(newvalue = undefined) {
     // This can be triggered with on change or generally
     if (newvalue === undefined) newvalue = donationRep.value;
@@ -129,7 +132,9 @@ function updateDonoList(newvalue = undefined) {
 
 // Update dono list on donation coming in
 donationRep.on("change", function (newvalue, oldvalue) {
-    updateDonoList(newvalue);
+    if (newvalue !== undefined && (oldvalue === undefined || JSON.stringify(newvalue) !== JSON.stringify(oldvalue))) {
+        updateDonoList(newvalue);
+    }
 });
 
 clearDonosElem.addEventListener("click", () => {

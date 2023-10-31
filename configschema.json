@@ -11,6 +11,16 @@
             "description": "API key for freecurrencyapi.com, used for uncommon currencies (avoids rate limiting)",
             "type": "string",
             "default": ""
+        },
+        "donoWhitelist": {
+            "description": "If true, waits for donos to be approved on reader to display. If false, gives a 15s window to censor",
+            "type": "boolean",
+            "default": false
+        },
+        "blacklistWindowSec": {
+            "description": "Delay in displaying donation to give time to censor, in seconds",
+            "type": "number",
+            "default": 15
         }
     }
 }

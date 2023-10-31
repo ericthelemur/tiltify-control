@@ -1,4 +1,14 @@
 module.exports = function (nodecg) {
+    function equivListOfObjects(list1, list2) {
+        if (list1 === list2) return true;
+        if (list1.length != list2.length) return false;
+        if (list1.every((v, i) => v === list2[i])) return true;
+        return JSON.stringify(list1) === JSON.stringify(list2);
+    }
+
+    const approvedDonationsRep = nodecg.Replicant("approvedDonations", { persistent: true, defaultValue: [] });
+    const donationsRep = nodecg.Replicant("donations", "nodecg-tiltify");
+
     var conversionRates = {};
 
     function convertAmounts() {
@@ -17,9 +27,15 @@ module.exports = function (nodecg) {
             convertAmounts();
         });
 
-    var donationsRep = nodecg.Replicant("donations", "nodecg-tiltify");
     donationsRep.on("change", (newval) => {
         console.log("changed donations", newval);
         convertAmounts();
+
+        if (nodecg.bundleConfig.donoWhitelist) {
+            const approvedDonos = donationsRep.value.filter((d) => d.approved);
+            if (!equivListOfObjects(approvedDonos, approvedDonationsRep.value)) {
+                approvedDonationsRep.value = approvedDonos;
+            }
+        }
     })
 };
