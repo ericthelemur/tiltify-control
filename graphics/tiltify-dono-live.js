@@ -57,17 +57,6 @@ function createButton(toggle, textTrue, iconTrue, textFalse, iconFalse, onclick 
     return button;
 }
 
-function updateCensorBtnTime(btn) {
-    // Move progress bar on auto button
-    const now = Date.now();
-    if (now > btn.dataset.timeToApprove) return;
-    const target = btn.dataset.timeToApprove;
-    const windowSec = nodecg.bundleConfig.blacklistWindowSec;
-    const facDone = Math.round((target - now) / (windowSec * 10));
-    const facLimit = 100 - Math.max(0, Math.min(100, facDone));
-    btn.style.setProperty("--progress", `${facLimit}%`);
-}
-
 function moveKey(dono) {
     // Generates the key to identify donations with
     return { id: dono.id, read: dono.read, modStatus: dono.modStatus }
@@ -121,7 +110,7 @@ function updateDonoList(newvalue = undefined) {
                     createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, [
                         ...dono.read ? createIcon("envelope-open-fill") : createIcon("envelope-fill"),
                         ...dono.shown ? createIcon("eye-fill") : createIcon("eye-slash-fill"),
-                        ...tripleState(dono.modStatus, createIcon("check-square"), createIcon("question-square"), createIcon("check-square"))
+                        ...tripleState(dono.modStatus, createIcon("check-square"), createIcon("question-square"), createIcon("x-square"))
                     ])
                 ]),
                 createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
@@ -170,9 +159,3 @@ showCensoredElem.addEventListener("input", (e) => {
 newestFirstElem.addEventListener("input", (e) => {
     updateDonoList();
 })
-
-setInterval(() => {
-    for (const btn of document.getElementsByClassName("censor-btn")) {
-        updateCensorBtnTime(btn);
-    }
-}, 250);

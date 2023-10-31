@@ -41,25 +41,27 @@ function createButtons(dono, changed) {
     var censorBtn;
     const whitelist = nodecg.bundleConfig.donoWhitelist;
     if (whitelist) {
-        censorBtn = createButton(dono.modStatus === APPROVED, "Censor", "ban", "Approve", "check-lg", modAction(dono));
+        censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", "check-lg", "Censor", "ban", modAction(dono), ["rounded-start"]);
     } else {
-        censorBtn = createButton(dono.modStatus === CENSORED, "Approve", "check-lg", "Censor", "ban", modAction(dono));
-        censorBtn.classList.replace("btn-primary", "btn-outline-primary");
+        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", "ban", "Approve", "check-lg", modAction(dono), ["rounded-start"]);
+        // censorBtn.classList.replace("btn-primary", "btn-outline-primary");
         // If blacklisting, initiate count to auto-approval
         if (dono.modStatus === UNDECIDED) {
             censorBtn.classList.add("censor-btn");
             censorBtn.dataset.timeToApprove = dono.timeToApprove;
             censorBtn.dataset.donoId = dono.id;
             updateCensorBtnTime(censorBtn);
+        } else {
+            censorBtn.classList.replace("btn-primary", "btn-outline-primary");
         }
     }
 
     // Create button row
     const btnGroup = createElem("div", ["btn-group"], undefined, (e) => e.role = "group", [
-        createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono)),
+        createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono), ["me-2", "rounded-end"]),
         censorBtn,
         // Bonus mod button (set to the 3rd state, usually reset to undecided)
-        createButton(false, "", "", "", tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? "ban" : "check-lg", "arrow-counterclockwise"), bonus(dono), ["bonus-btn"])
+        createButton(false, "", "", " ", tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? "ban" : "check-lg", "arrow-counterclockwise"), bonus(dono), ["bonus-btn"])
     ])
     // Disable buttons for 0.5s if the element has moved (avoids misclicks)
     if (changed) {
@@ -69,3 +71,23 @@ function createButtons(dono, changed) {
 
     return btnGroup;
 }
+
+function updateCensorBtnTime(btn) {
+    // Move progress bar on auto button
+    const now = Date.now();
+    if (now > btn.dataset.timeToApprove) return;
+    const target = btn.dataset.timeToApprove;
+    const windowSec = nodecg.bundleConfig.blacklistWindowSec;
+    const facDone = Math.round((target - now) / (windowSec * 10));
+    const facLimit = 100 - Math.max(0, Math.min(100, facDone));
+    btn.style.setProperty("--progress", `${facLimit}%`);
+    if (btn.nextSibling && btn.nextSibling.classList.contains("bonus-btn")) {
+        btn.nextSibling.children[1].innerText = `(${Math.round((target - now) / 1000)}s)`
+    }
+}
+
+setInterval(() => {
+    for (const btn of document.getElementsByClassName("censor-btn")) {
+        updateCensorBtnTime(btn);
+    }
+}, 250);

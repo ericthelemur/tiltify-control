@@ -64,6 +64,10 @@ h2 {
     content: "";
 }
 
+.censored .card-title {
+    color: var(--bs-danger)
+}
+
 .approved .card-title {
     color: var(--bs-success)
 }
