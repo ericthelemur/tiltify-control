@@ -38,6 +38,7 @@ function read(dono) {
 }
 
 var timerButtons = [];
+var buttonGroups = [];
 function createButtons(dono, changed) {
     // Main mod action button -- either approve or censor based on mode
     var censorBtn;
@@ -46,7 +47,7 @@ function createButtons(dono, changed) {
         censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", "check-lg", "Censor", "ban", modAction(dono, dono.modStatus === APPROVED), ["rounded-start"]);
     } else {
         censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", "ban", "Approve", "check-lg", modAction(dono, dono.modStatus === CENSORED), ["rounded-start"]);
-        // censorBtn.classList.replace("btn-primary", "btn-outline-primary");
+
         // If blacklisting, initiate count to auto-approval
         if (dono.modStatus === UNDECIDED) {
             censorBtn.classList.add("censor-btn");
@@ -69,11 +70,7 @@ function createButtons(dono, changed) {
             createElem("small", ["rem-time"])
         ])
     ]);
-    // Disable buttons for 0.5s if the element has moved (avoids misclicks)
-    if (changed) {
-        [].forEach.call(btnGroup.children, (e) => e.disabled = true);
-        setTimeout(() => [].forEach.call(btnGroup.children, (e) => e.disabled = false), 500);
-    }
+    buttonGroups.push(btnGroup);
 
     return btnGroup;
 }

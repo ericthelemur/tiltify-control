@@ -32,8 +32,34 @@ function getAmount(currency, value, disp) {
     return [c1, displayCurrFormat.format(disp)]
 }
 
-// Settings elements
+function enableAllButtons(state) {
+    console.log("bgs to", state);
+    buttonGroups.forEach((btnGroup) =>
+        [].forEach.call(btnGroup.children, (e) => e.disabled = state)
+    )
+}
+
 const donoElem = document.getElementById("donations");
+
+// Auto disable buttons on change
+var timeout;
+function tempDisableButtons() {
+    enableAllButtons(true);
+    clearTimeout(timeout);
+    timeout = setTimeout(() => enableAllButtons(false), 500);
+}
+var mutationObserver = new MutationObserver(tempDisableButtons);
+mutationObserver.observe(donoElem, { childList: true, attributeFilter: ["display"] })
+
+
+function canDisplay(dono) {
+    // Filter by read
+    return dono.read ? showElems.read.checked : showElems.unread.checked &&
+        // Filter by mod status
+        tripleState(dono.modStatus, showElems.approved.checked, showElems.undecided.checked, showElems.censored.checked);
+}
+
+// Settings elements
 const newestFirstElem = document.getElementById("newest");
 const clearDonosElem = document.getElementById("clear-donations");
 const approveAllElem = document.getElementById("approve-all");
@@ -46,14 +72,8 @@ for (const key of showCategories) {
     donoElem.dataset[key] = elem.checked.toString();
     showElems[key].addEventListener("input", (e) => {
         donoElem.dataset[key] = elem.checked;
+        tempDisableButtons();
     });
-}
-
-function canDisplay(dono) {
-    // Filter by read
-    return dono.read ? showElems.read.checked : showElems.unread.checked &&
-        // Filter by mod status
-        tripleState(dono.modStatus, showElems.approved.checked, showElems.undecided.checked, showElems.censored.checked);
 }
 
 function createIcon(icon, label = undefined) {
@@ -85,6 +105,7 @@ function updateDonoList(newvalue = undefined) {
     if (newvalue === undefined) newvalue = donationRep.value;
     console.log("Updating", newvalue)
     timerButtons = [];
+    buttonGroups = [];
 
     var newexisting = [];
     var newdonos = [];
