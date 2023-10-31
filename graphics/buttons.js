@@ -44,9 +44,11 @@ function createButtons(dono, changed) {
     var censorBtn;
     const whitelist = nodecg.bundleConfig.donoWhitelist || dono.timeToApprove === 8.64e15;
     if (whitelist) {
-        censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", "check-lg", "Censor", "ban", modAction(dono, dono.modStatus === APPROVED), ["rounded-start"]);
+        censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", categoryIcons.approved, "Censor", categoryIcons.censored,
+            modAction(dono, dono.modStatus === APPROVED), ["rounded-start"]);
     } else {
-        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", "ban", "Approve", "check-lg", modAction(dono, dono.modStatus === CENSORED), ["rounded-start"]);
+        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", categoryIcons.censor, "Approve", categoryIcons.approved,
+            modAction(dono, dono.modStatus === CENSORED), ["rounded-start"]);
 
         // If blacklisting, initiate count to auto-approval
         if (dono.modStatus === UNDECIDED) {
@@ -62,11 +64,11 @@ function createButtons(dono, changed) {
 
     // Create button row
     const btnGroup = createElem("div", ["btn-group"], undefined, (e) => e.role = "group", [
-        createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono), ["me-2", "rounded-end"]),
+        createButton(!dono.read, "Read", categoryIcons.read, "Unread", categoryIcons.unread, read(dono), ["me-2", "rounded-end"]),
         censorBtn,
         // Bonus mod button (set to the 3rd state, usually reset to undecided)
         createElem("button", ["btn", "btn-outline-primary", "bonus-btn"], undefined, (e) => e.addEventListener("click", bonus(dono, whitelist)), [
-            ...createIcon(tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? "ban" : "check-lg", "arrow-counterclockwise")),
+            ...createIcon(tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? categoryIcons.censored : categoryIcons.approved, "arrow-counterclockwise")),
             createElem("small", ["rem-time"])
         ])
     ]);

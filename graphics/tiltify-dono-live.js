@@ -66,11 +66,12 @@ const approveAllElem = document.getElementById("approve-all");
 
 const showElems = {};
 const showCategories = ["unread", "read", "approved", "undecided", "censored"];
+const categoryIcons = { "unread": "envelope-open-fill", "read": "envelope-fill", "approved": "check-lg", "undecided": "question-lg", "censored": "ban", "shown": "eye-fill", "unshown": "eye-slash-fill" }
 for (const key of showCategories) {
     const elem = document.getElementById("show-" + key);
     showElems[key] = elem;
-    donoElem.dataset[key] = elem.checked.toString();
-    showElems[key].addEventListener("input", (e) => {
+    donoElem.dataset[key] = elem.checked;
+    elem.addEventListener("input", (e) => {
         donoElem.dataset[key] = elem.checked;
         tempDisableButtons();
     });
@@ -139,9 +140,9 @@ function updateDonoList(newvalue = undefined) {
                     createElem("span", [], " "),
                     createElem("span", ["date"], dateFormat.format(date)),
                     createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, [
-                        ...dono.read ? createIcon("envelope-open-fill") : createIcon("envelope-fill"),
-                        ...dono.shown ? createIcon("eye-fill") : createIcon("eye-slash-fill"),
-                        ...tripleState(dono.modStatus, createIcon("check-square"), createIcon("question-square"), createIcon("x-square"))
+                        ...createIcon(dono.read ? categoryIcons.read : categoryIcons.unread),
+                        ...createIcon(dono.shown ? categoryIcons : categoryIcons.unshown),
+                        ...createIcon(tripleState(dono.modStatus, categoryIcons.approved, categoryIcons.undecided, categoryIcons.censored))
                     ])
                 ]),
                 createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
