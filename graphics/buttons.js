@@ -9,13 +9,12 @@ function tripleState(v, appVal, undecVal, cenVal) {
 
 function modAction(dono) {
     // Triggers the main mod action (approve/censor)
-    dono.timeToApprove = 8.64e15;
     if (nodecg.bundleConfig.donoWhitelist) {
         // Unknown & censored => accepted, accepted => censored
-        return () => dono.modStatus = tripleState(dono.modStatus, CENSORED, APPROVED, APPROVED);
+        return () => { dono.timeToApprove = 8.64e15; dono.modStatus = tripleState(dono.modStatus, CENSORED, APPROVED, APPROVED) };
     } else {
         // Unknown & accepted => censored, censored => accepted
-        return () => dono.modStatus = tripleState(dono.modStatus, CENSORED, CENSORED, APPROVED);
+        return () => { dono.timeToApprove = 8.64e15; dono.modStatus = tripleState(dono.modStatus, CENSORED, CENSORED, APPROVED) };
     }
 }
 

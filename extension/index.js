@@ -39,12 +39,12 @@ module.exports = function (nodecg) {
                 }
             }
         } else {    // Blacklist, mark auto approval time
-            // const now = Date.now();
-            // for (const dono of newval) {
-            //     if (!dono.timeToApprove) {
-            //         dono.timeToApprove = now + nodecg.bundleConfig.blacklistWindowSec * 1000;
-            //     }
-            // }
+            const now = Date.now();
+            for (const dono of newval) {
+                if (dono.timeToApprove === undefined) {
+                    dono.timeToApprove = now + nodecg.bundleConfig.blacklistWindowSec * 1000;
+                }
+            }
         }
         // const approvedDonos = donationsRep.value.filter((d) => d.approved);
         // if (!equivListOfObjects(approvedDonos, approvedDonationsRep.value)) {
@@ -53,6 +53,7 @@ module.exports = function (nodecg) {
     })
 
     if (!nodecg.bundleConfig.donoWhitelist) {
+        // If blacklist, poll for the approval time passing
         setInterval(() => {
             const now = Date.now();
             for (const dono of donationsRep.value) {
@@ -62,7 +63,6 @@ module.exports = function (nodecg) {
                 }
             }
         }, 1000)
-        // If blacklist, poll for the approval time passing
 
     }
 };
