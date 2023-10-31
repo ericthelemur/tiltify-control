@@ -120,7 +120,7 @@ h2 {
     --col1: var(--bs-primary);
     --col2: var(--bs-success);
     position: relative;
-    background: linear-gradient(to right, var(--col2) 0%, var(--col2) var(--progress), var(--col1) var(--progress), var(--col1) 100%);
+    background: var(--col1) linear-gradient(to right, var(--col2) 0%, var(--col2) var(--progress), var(--col1) var(--progress), var(--col1) 100%);
 }
 
 .censor-btn:hover {
@@ -130,4 +130,16 @@ h2 {
 .bonus-btn {
     width: fit-content;
     flex-grow: 0 !important;
+}
+
+.bonus-btn.rem-time small {
+    font-size: 0.75em;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+}
+
+.bonus-btn.rem-time i::before {
+    transform: translateY(-25%);
 }

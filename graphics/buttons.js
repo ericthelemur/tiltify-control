@@ -61,8 +61,11 @@ function createButtons(dono, changed) {
         createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono), ["me-2", "rounded-end"]),
         censorBtn,
         // Bonus mod button (set to the 3rd state, usually reset to undecided)
-        createButton(false, "", "", " ", tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? "ban" : "check-lg", "arrow-counterclockwise"), bonus(dono), ["bonus-btn"])
-    ])
+        createElem("button", ["btn", "btn-outline-primary", "bonus-btn"], undefined, (e) => e.addEventListener("click", bonus(dono)), [
+            ...createIcon(tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? "ban" : "check-lg", "arrow-counterclockwise")),
+            createElem("small", ["rem-time"])
+        ])
+    ]);
     // Disable buttons for 0.5s if the element has moved (avoids misclicks)
     if (changed) {
         [].forEach.call(btnGroup.children, (e) => e.disabled = true);
@@ -74,6 +77,7 @@ function createButtons(dono, changed) {
 
 function updateCensorBtnTime(btn) {
     // Move progress bar on auto button
+    // Calculate remaining time
     const now = Date.now();
     if (now > btn.dataset.timeToApprove) return;
     const target = btn.dataset.timeToApprove;
@@ -81,8 +85,12 @@ function updateCensorBtnTime(btn) {
     const facDone = Math.round((target - now) / (windowSec * 10));
     const facLimit = 100 - Math.max(0, Math.min(100, facDone));
     btn.style.setProperty("--progress", `${facLimit}%`);
-    if (btn.nextSibling && btn.nextSibling.classList.contains("bonus-btn")) {
-        btn.nextSibling.children[1].innerText = `(${Math.round((target - now) / 1000)}s)`
+
+    // Set time property
+    const bonusBtn = btn.nextSibling;
+    if (bonusBtn && bonusBtn.classList.contains("bonus-btn")) {
+        if (!bonusBtn.classList.contains("rem-time")) bonusBtn.classList.add("rem-time")
+        bonusBtn.children[1].innerText = `(${Math.round((target - now) / 1000)}s)`
     }
 }
 
