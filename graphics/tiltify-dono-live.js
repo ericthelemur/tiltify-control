@@ -59,11 +59,7 @@ function canDisplay(dono) {
         tripleState(dono.modStatus, showElems.approved.checked, showElems.undecided.checked, showElems.censored.checked);
 }
 
-// Settings elements
-const newestFirstElem = document.getElementById("newest");
-const clearDonosElem = document.getElementById("clear-donations");
-const approveAllElem = document.getElementById("approve-all");
-
+// Settings
 const showElems = {};
 const showCategories = ["unread", "read", "approved", "undecided", "censored"];
 const categoryIcons = { "unread": "envelope-open-fill", "read": "envelope-fill", "approved": "check-lg", "undecided": "question-lg", "censored": "ban", "shown": "eye-fill", "unshown": "eye-slash-fill" }
@@ -76,6 +72,25 @@ for (const key of showCategories) {
         tempDisableButtons();
     });
 }
+
+function resort() {
+    const factor = sortElems.asc.checked ? 1 : -1;
+    const donos = Array.from(donoElem.children);
+    const attr = sortElems.money.checked ? "money" : "date";
+    donos.sort((a, b) => factor * (a.dataset[attr] - b.dataset[attr]))
+    donoElem.replaceChildren(...donos);
+}
+
+const sortElems = {};
+const sortCategories = ["asc", "dsc", "date", "money"];
+for (const key of sortCategories) {
+    const elem = document.getElementById("sort-" + key);
+    sortElems[key] = elem;
+    elem.addEventListener("input", (e) => {
+        resort()
+    });
+}
+
 
 function createIcon(icon, label = undefined) {
     // Create a Bootstrap icon with optional text
@@ -111,7 +126,6 @@ function updateDonoList(newvalue = undefined) {
     var newexisting = [];
     var newdonos = [];
     var i = 0;
-    if (newestFirstElem.checked) newvalue = newvalue.slice().reverse();
     if (newvalue.length == 0) newdonos = [createElem("h2", undefined, "No donations yet")]
     for (var dono of newvalue) {
         // Track if element has moved, if so, disable buttons below for 1s
@@ -125,8 +139,8 @@ function updateDonoList(newvalue = undefined) {
         const cardClasses = ["card", dono.read ? "read" : "unread", tripleState(dono.modStatus, "approved", "undecided", "censored")];
         newdonos.push(createElem("div", cardClasses, undefined, (e) => {
             e.id = "dono-" + dono.id;
-            e.dataset.date = dono.completed_at;
-            e.dataset.amount = dono.amountDisplay;
+            e.dataset.date = -Math.trunc(new Date(dono.completed_at).getTime());
+            e.dataset.money = Math.round(dono.amountDisplay * 100);
         }, [
             createElem("div", ["card-body"], undefined, undefined, [
                 // Title with donor and amounts
@@ -157,6 +171,7 @@ function updateDonoList(newvalue = undefined) {
 
     donoElem.replaceChildren(...newdonos);
     existing = newexisting;
+    resort();
 }
 
 // Update dono list on donation coming in
@@ -166,6 +181,7 @@ donationRep.on("change", function (newvalue, oldvalue) {
     }
 });
 
+const clearDonosElem = document.getElementById("clear-donations");
 clearDonosElem.addEventListener("click", () => {
     var confirmClear = confirm("Are you sure you want to clear all donations for all readers?")
     if (confirmClear == true) {
@@ -173,6 +189,7 @@ clearDonosElem.addEventListener("click", () => {
     }
 })
 
+const approveAllElem = document.getElementById("approve-all");
 approveAllElem.addEventListener("click", () => {
     var confirmClear = confirm("Are you sure you want to mark all unmoderated donations approved?")
     if (confirmClear == true) {
