@@ -20,6 +20,7 @@
         <summary class="btn btn-primary"><i class="bi bi-gear-fill"></i></summary>
         <div class="button-row bg-body-secondary rounded p-3  border" style="--bs-bg-opacity: .75;">
             <h5>Local Settings</h5>
+            <h6 class="mb-0">Filters</h6>
             <div class="btn-group" role="group">
                 <input type="checkbox" class="btn-check filter-setting" id="show-unread" autocomplete="off" checked>
                 <label class="btn btn-outline-primary" for="show-unread"><i class="bi bi-envelope-fill"></i></label>
@@ -43,6 +44,23 @@
                 <input class="form-check-input" type="checkbox" role="switch" id="newest">
                 <label class="form-check-label" for="newest">Newest First</label>
             </span>
+
+            <h6 class="mt-2 mb-0">Sort by</h6>
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="order" id="sort-asc" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="sort-asc"><i class="bi bi-arrow-up"></i></label>
+
+                <input type="radio" class="btn-check" name="order" id="sort-dsc" autocomplete="off">
+                <label class="btn btn-outline-primary" for="sort-dsc"><i class="bi bi-arrow-down"></i></label>
+            </div>
+
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="sort" id="sort-date" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="sort-date"><i class="bi bi-clock"></i></label>
+
+                <input type="radio" class="btn-check" name="sort" id="sort-amt" autocomplete="off">
+                <label class="btn btn-outline-primary" for="sort-amt"><i class="bi bi-currency-pound"></i></label>
+            </div>
 
             <h5 class="mt-2">Global Settings</h5>
             <button class="btn btn-outline-success" id="approve-all" role="button">Approve All</button>

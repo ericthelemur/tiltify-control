@@ -13,8 +13,13 @@ module.exports = function (nodecg) {
 
     function convertAmounts() {
         for (var dono of donationsRep.value) {
-            if (dono.amountDisplay === undefined && conversionRates && dono.amount.currency in conversionRates) {
-                dono.amountDisplay = dono.amount.value / conversionRates[dono.amount.currency]
+            if (dono.amountDisplay === undefined) {
+                if (conversionRates && dono.amount.currency in conversionRates) {
+                    dono.amountDisplay = dono.amount.value / conversionRates[dono.amount.currency]
+                } else if (dono.amount.currency == nodecg.bundleConfig.displayCurrency) {
+                    // If rates not provided, can do trivial conversion
+                    dono.amountDisplay = dono.amount.value
+                }
             }
         }
     }

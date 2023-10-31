@@ -123,7 +123,11 @@ function updateDonoList(newvalue = undefined) {
         const amount = getAmount(dono.amount.currency, dono.amount.value, dono.amountDisplay);
         const date = new Date(dono.completed_at);
         const cardClasses = ["card", dono.read ? "read" : "unread", tripleState(dono.modStatus, "approved", "undecided", "censored")];
-        newdonos.push(createElem("div", cardClasses, undefined, (e) => e.id = "dono-" + dono.id, [
+        newdonos.push(createElem("div", cardClasses, undefined, (e) => {
+            e.id = "dono-" + dono.id;
+            e.dataset.date = dono.completed_at;
+            e.dataset.amount = dono.amountDisplay;
+        }, [
             createElem("div", ["card-body"], undefined, undefined, [
                 // Title with donor and amounts
                 createElem("h2", ["h5", "card-title"], undefined,
