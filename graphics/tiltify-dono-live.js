@@ -52,44 +52,69 @@ var mutationObserver = new MutationObserver(tempDisableButtons);
 mutationObserver.observe(donoElem, { childList: true, attributeFilter: ["display"] })
 
 
-function canDisplay(dono) {
-    // Filter by read
-    return dono.read ? showElems.read.checked : showElems.unread.checked &&
-        // Filter by mod status
-        tripleState(dono.modStatus, showElems.approved.checked, showElems.undecided.checked, showElems.censored.checked);
+
+// Find url params or generate default
+const url = new URL(window.location.href);
+const params = url.searchParams;
+var showParams = params.getAll("show");
+var sortParams = params.getAll("sort");
+
+
+function setParam(prefix, key, value, exclusive) {
+    if (!exclusive) {
+        if (value) params.append(prefix, key);
+        else params.delete(prefix, key);
+    } else {
+        params.delete(prefix);
+        params.set(prefix, key);
+    }
+    history.replaceState(null, null, url.href);
+}
+
+function settingsCategory(members, prefix, onclick, defaultVal = [], exclusive = false) {
+    // Register a settings category's onclick and elements
+
+    // Set default params if none then fetch
+    if (!params.has(prefix)) defaultVal.forEach((v) => params.append(prefix, v));
+    const catParams = params.getAll(prefix);
+    var elems = {};
+    for (const key of members) {
+        // Record element and set checked status
+        const elem = document.getElementById(`${prefix}-${key}`);
+        elems[key] = elem;
+        elem.checked = catParams.includes(key);
+
+        // On click trigger event, disable buttons and set param
+        elem.addEventListener("click", (e) => {
+            onclick(key, elem);
+            tempDisableButtons();
+            setParam(prefix, key, elem.checked, exclusive);
+        });
+    }
+    return elems;
 }
 
 // Settings
-const showElems = {};
 const showCategories = ["unread", "read", "approved", "undecided", "censored"];
 const categoryIcons = { "unread": "envelope-open-fill", "read": "envelope-fill", "approved": "check-lg", "undecided": "question-lg", "censored": "ban", "shown": "eye-fill", "unshown": "eye-slash-fill" }
-for (const key of showCategories) {
-    const elem = document.getElementById("show-" + key);
-    showElems[key] = elem;
-    donoElem.dataset[key] = elem.checked;
-    elem.addEventListener("input", (e) => {
-        donoElem.dataset[key] = elem.checked;
-        tempDisableButtons();
-    });
-}
+const showElems = settingsCategory(showCategories, "show", (k, e) => donoElem.dataset[k] = e.checked, ["unread", "approved", "undecided"], false);
 
 function resort() {
     const factor = sortElems.asc.checked ? 1 : -1;
     const donos = Array.from(donoElem.children);
-    const attr = sortElems.money.checked ? "money" : "date";
+    const attr = sortElems.money.checked ? "money" : "time";
     donos.sort((a, b) => factor * (a.dataset[attr] - b.dataset[attr]))
     donoElem.replaceChildren(...donos);
 }
 
-const sortElems = {};
-const sortCategories = ["asc", "dsc", "date", "money"];
-for (const key of sortCategories) {
-    const elem = document.getElementById("sort-" + key);
-    sortElems[key] = elem;
-    elem.addEventListener("input", (e) => {
-        resort()
-    });
-}
+const sortCategories = ["asc", "dsc", "time", "money"];
+const sortElems = Object.assign({},
+    settingsCategory(["asc", "dsc"], "order", resort, ["dsc"], true),
+    settingsCategory(["time", "money"], "sort", resort, ["sort"], true));
+
+history.replaceState(null, null, url.href);
+
+
 
 
 function createIcon(icon, label = undefined) {
@@ -139,7 +164,7 @@ function updateDonoList(newvalue = undefined) {
         const cardClasses = ["card", dono.read ? "read" : "unread", tripleState(dono.modStatus, "approved", "undecided", "censored")];
         newdonos.push(createElem("div", cardClasses, undefined, (e) => {
             e.id = "dono-" + dono.id;
-            e.dataset.date = -Math.trunc(new Date(dono.completed_at).getTime());
+            e.dataset.time = -Math.trunc(new Date(dono.completed_at).getTime());
             e.dataset.money = Math.round(dono.amountDisplay * 100);
         }, [
             createElem("div", ["card-body"], undefined, undefined, [
