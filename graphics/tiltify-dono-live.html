@@ -18,10 +18,10 @@
 <body>
     <details id="settings" class="m-2">
         <summary class="btn btn-primary"><i class="bi bi-gear-fill"></i></summary>
-        <div class="button-row bg-body-secondary rounded p-3  border" style="--bs-bg-opacity: .75;">
+        <div id="dropdown" class="bg-body-secondary rounded p-3 border mw-100" style="--bs-bg-opacity: .75;">
             <h5>Local Settings</h5>
             <h6 class="mb-0">Filters</h6>
-            <div class="btn-group" role="group">
+            <div class="btn-group me-2" role="group">
                 <input type="checkbox" class="btn-check filter-setting" id="show-unread" autocomplete="off" checked>
                 <label class="btn btn-outline-primary" for="show-unread"><i class="bi bi-envelope-fill"></i></label>
 
@@ -41,7 +41,7 @@
             </div>
 
             <h6 class="mt-2 mb-0">Sort by</h6>
-            <div class="btn-group" role="group">
+            <div class="btn-group me-2" role="group">
 
                 <input type="radio" class="btn-check" name="order" id="order-dsc" autocomplete="off" checked>
                 <label class="btn btn-outline-primary" for="order-dsc"><i class="bi bi-arrow-down"></i></label>
@@ -59,8 +59,8 @@
             </div>
 
             <h5 class="mt-2">Global Settings</h5>
-            <button class="btn btn-outline-success" id="approve-all" role="button">Approve All</button>
-            <button class="btn btn-danger" id="clear-donations" role="button">Read All</button>
+            <button class="my-2 btn btn-outline-success" id="approve-all" role="button">Approve All</button>
+            <button class="my-2 btn btn-danger" id="clear-donations" role="button">Read All</button>
         </div>
     </details>
     <div class="container-xxl mt-3">

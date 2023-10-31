@@ -98,10 +98,11 @@ function settingsCategory(members, prefix, onclick, defaultVal = [], exclusive =
 const showCategories = ["unread", "read", "approved", "undecided", "censored"];
 const categoryIcons = { "unread": "envelope-open-fill", "read": "envelope-fill", "approved": "check-lg", "undecided": "question-lg", "censored": "ban", "shown": "eye-fill", "unshown": "eye-slash-fill" }
 const showElems = settingsCategory(showCategories, "show", (k, e) => donoElem.dataset[k] = e.checked, ["unread", "approved", "undecided"], false);
+Object.entries(showElems).forEach(([k, e]) => donoElem.dataset[k] = e.checked);
 
-function resort() {
+function resort(children = undefined) {
     const factor = sortElems.asc.checked ? 1 : -1;
-    const donos = Array.from(donoElem.children);
+    const donos = Array.from(children === undefined ? donoElem.children : children);
     const attr = sortElems.money.checked ? "money" : "time";
     donos.sort((a, b) => factor * (a.dataset[attr] - b.dataset[attr]))
     donoElem.replaceChildren(...donos);
@@ -109,8 +110,8 @@ function resort() {
 
 const sortCategories = ["asc", "dsc", "time", "money"];
 const sortElems = Object.assign({},
-    settingsCategory(["asc", "dsc"], "order", resort, ["dsc"], true),
-    settingsCategory(["time", "money"], "sort", resort, ["sort"], true));
+    settingsCategory(["asc", "dsc"], "order", () => resort(), ["dsc"], true),
+    settingsCategory(["time", "money"], "sort", () => resort(), ["sort"], true));
 
 history.replaceState(null, null, url.href);
 
@@ -194,9 +195,8 @@ function updateDonoList(newvalue = undefined) {
         ]));
     }
 
-    donoElem.replaceChildren(...newdonos);
+    resort(newdonos);
     existing = newexisting;
-    resort();
 }
 
 // Update dono list on donation coming in

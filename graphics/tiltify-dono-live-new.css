@@ -107,7 +107,6 @@ h2 {
 }
 
 #settings {
-    /* width: fit-content; */
     position: absolute;
     z-index: 10;
 }
@@ -116,11 +115,15 @@ h2 {
     opacity: 0.5;
 }
 
-.button-row {
-    backdrop-filter: blur(2px);
-    display: flex;
+#settings #dropdown {
+    backdrop-filter: blur(2px) saturate(50%);
+    /* display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 0.25em; */
+}
+
+#settings #dropdown .btn-group {
+    margin: 0.25em 0;
 }
 
 .btn-primary {
