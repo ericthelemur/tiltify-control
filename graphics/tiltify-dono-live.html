@@ -1,5 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+<script>
+    // Load key from url into cookie immediately
+    if (!document.cookie.includes("socketToken")) {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("key")) {
+            document.cookie = `socketToken=${params.get("key")};path=/`;
+            window.location.href = window.location.href;
+        }
+    }
+</script>
 
 <head>
     <meta charset="UTF-8">
