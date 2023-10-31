@@ -23,8 +23,8 @@ const baseCurrFormat = (curr) => new Intl.NumberFormat(undefined, { style: 'curr
 const timeFormat = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "numeric" });
 const dateFormat = new Intl.DateTimeFormat(undefined, { day: "numeric", weekday: "short", month: "short" })
 
-// Format value for display
 function getAmount(currency, value, disp) {
+    // Format value for display
     const c1 = baseCurrFormat(currency).format(value);
     if (currency == nodecg.bundleConfig.displayCurrency || disp === undefined) {
         return [c1, undefined]
@@ -32,38 +32,43 @@ function getAmount(currency, value, disp) {
     return [c1, displayCurrFormat.format(disp)]
 }
 
-function read(dono) {
-    if (!dono.read) {
-        return () => nodecg.sendMessageToBundle('mark-donation-as-read', 'nodecg-tiltify', dono);
-    } else {
-        return () => dono.read = false;
-    }
-}
-
-function approve(dono) {
-    return () => dono.approved = !dono.approved;
-}
-
+// Settings elements
 const donoElem = document.getElementById("donations");
 const clearDonosElem = document.getElementById("clear-donations");
 const showReadElem = document.getElementById("show-read");
 const newestFirstElem = document.getElementById("newest");
 
-function moveKey(dono) {
-    return { id: dono.id, read: dono.read }
+function createIcon(icon, label = undefined) {
+    // Create a Bootstrap icon with optional text
+    const i = [createElem("i", ["bi", "bi-" + icon])];
+    if (label) i.push(createElem("span", [], " " + label))
+    return i;
 }
 
-function createIcon(icon) {
-    return createElem("i", ["bi", "bi-" + icon]);
-}
-
-function createButton(toggle, textTrue, iconTrue, textFalse, iconFalse, onclick = undefined) {
-    const button = createElem("button", ["btn", toggle ? "btn-primary" : "btn-outline-primary"], undefined, undefined, [
-        createIcon(toggle ? iconTrue : iconFalse),
-        createElem("span", undefined, toggle ? textTrue : textFalse)
-    ]);
+function createButton(toggle, textTrue, iconTrue, textFalse, iconFalse, onclick = undefined, classes = []) {
+    // Create toggle button with icon & text
+    const button = createElem("button", ["btn", toggle ? "btn-primary" : "btn-outline-primary"], undefined, undefined,
+        createIcon(toggle ? iconTrue : iconFalse, toggle ? textTrue : textFalse)
+    );
     if (onclick) button.addEventListener("click", onclick);
+    classes.forEach((c) => button.classList.add(c));
     return button;
+}
+
+function updateCensorBtnTime(btn) {
+    // Move progress bar on auto button
+    const now = Date.now();
+    if (now > btn.dataset.timeToApprove) return;
+    const target = btn.dataset.timeToApprove;
+    const windowSec = nodecg.bundleConfig.blacklistWindowSec;
+    const facDone = Math.round((target - now) / (windowSec * 10));
+    const facLimit = 100 - Math.max(0, Math.min(100, facDone));
+    btn.style.setProperty("--progress", `${facLimit}%`);
+}
+
+function moveKey(dono) {
+    // Generates the key to identify donations with
+    return { id: dono.id, read: dono.read, modStatus: dono.modStatus }
 }
 
 var existing = [];
@@ -86,42 +91,37 @@ function updateDonoList(newvalue = undefined) {
 
         // Track if element has moved, if so, disable buttons below for 1s
         const key = moveKey(dono);
-        console.log(key, existing[i])
         const changed = JSON.stringify(key) !== JSON.stringify(existing[i]);
         newexisting.push(key);
         i++;
 
-        const btnGroup = createElem("div", ["btn-group"], undefined, (e) => e.role = "group", [
-            createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono)),
-            createButton(!dono.approved, "Approve", "eye-fill", "Censor", "eye-slash-fill", approve(dono))
-        ])
-        if (changed) {
-            [].forEach.call(btnGroup.children, (e) => e.disabled = true);
-            setTimeout(() => [].forEach.call(btnGroup.children, (e) => e.disabled = false), 500);
-        }
-
-
         const amount = getAmount(dono.amount.currency, dono.amount.value, dono.amountDisplay);
         const date = new Date(dono.completed_at);
-        const cardClasses = ["card"];
-        if (dono.read) cardClasses.push("read");
+        const cardClasses = ["card", dono.read ? "read" : "unread", tripleState(dono.modStatus, "approved", "undecided", "censored")];
         newdonos.push(createElem("div", cardClasses, undefined, (e) => e.id = "dono-" + dono.id, [
             createElem("div", ["card-body"], undefined, undefined, [
+                // Title with donor and amounts
                 createElem("h2", ["h5", "card-title"], undefined,
-                    (e) => { if (dono.seen) e.prepend(createIcon("eye-fill")) },
+                    (e) => { if (dono.shown) e.prepend(createIcon("eye-fill")) },
                     [
                         createElem("span", ["name"], dono.donor_name),
                         createElem("span", ["donated"], " donated "),
                         createElem("span", ["amount"], amount[0]),
                         createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
                     ]),
+                // Subtitle with date and status effects
                 createElem("small", ["datetime", "card-subtitle", "text-black-50"], undefined, undefined, [
                     createElem("span", ["time"], timeFormat.format(date)),
                     createElem("span", [], " "),
-                    createElem("span", ["date"], dateFormat.format(date))
+                    createElem("span", ["date"], dateFormat.format(date)),
+                    createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, [
+                        ...dono.read ? createIcon("envelope-open-fill") : createIcon("envelope-fill"),
+                        ...dono.shown ? createIcon("eye-fill") : createIcon("eye-slash-fill"),
+                        ...tripleState(dono.modStatus, createIcon("check-square"), createIcon("question-square"), createIcon("check-square"))
+                    ])
                 ]),
                 createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
-                btnGroup
+                createButtons(dono, changed)
             ])
         ]));
     }
@@ -151,3 +151,9 @@ showReadElem.addEventListener("input", (e) => {
 newestFirstElem.addEventListener("input", (e) => {
     updateDonoList();
 })
+
+setInterval(() => {
+    for (const btn of document.getElementsByClassName("censor-btn")) {
+        updateCensorBtnTime(btn);
+    }
+}, 250);

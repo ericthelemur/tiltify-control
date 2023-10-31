@@ -28,14 +28,41 @@ module.exports = function (nodecg) {
         });
 
     donationsRep.on("change", (newval) => {
-        console.log("changed donations", newval);
+        console.log("changed donations", newval[0]);
         convertAmounts();
 
         if (nodecg.bundleConfig.donoWhitelist) {
-            const approvedDonos = donationsRep.value.filter((d) => d.approved);
-            if (!equivListOfObjects(approvedDonos, approvedDonationsRep.value)) {
-                approvedDonationsRep.value = approvedDonos;
+            // Ensure auto approve date is never hit (so can switch to blacklist safely)
+            for (const dono of newval) {
+                if (dono.timeToApprove != 8.64e15) {
+                    dono.timeToApprove = 8.64e15;
+                }
             }
+        } else {    // Blacklist, mark auto approval time
+            // const now = Date.now();
+            // for (const dono of newval) {
+            //     if (!dono.timeToApprove) {
+            //         dono.timeToApprove = now + nodecg.bundleConfig.blacklistWindowSec * 1000;
+            //     }
+            // }
         }
+        // const approvedDonos = donationsRep.value.filter((d) => d.approved);
+        // if (!equivListOfObjects(approvedDonos, approvedDonationsRep.value)) {
+        //     approvedDonationsRep.value = approvedDonos;
+        // }
     })
+
+    if (!nodecg.bundleConfig.donoWhitelist) {
+        setInterval(() => {
+            const now = Date.now();
+            for (const dono of donationsRep.value) {
+                if (dono.modStatus === undefined && dono.timeToApprove < now) {
+                    nodecg.log.info(`Donation ${dono.id} marked as approved as time has passed`);
+                    dono.modStatus = true;
+                }
+            }
+        }, 1000)
+        // If blacklist, poll for the approval time passing
+
+    }
 };

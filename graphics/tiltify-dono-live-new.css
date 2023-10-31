@@ -20,8 +20,52 @@ h2 {
     flex-grow: 1;
 }
 
-.read {
+.read,
+.censored {
     opacity: 0.5;
+}
+
+.censored {
+    background-color: black;
+}
+
+.censored .card-body {
+    visibility: hidden;
+    position: relative;
+    z-index: -1;
+    transition: visibility 0s;
+    transition-delay: 0.1s;
+}
+
+.censored::after {
+    content: "CENSORED";
+    color: white;
+    font-weight: bold;
+    font-size: 1.5em;
+    position: absolute;
+    top: 1em;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.censored:hover {
+    background-color: transparent;
+    color: inherit;
+}
+
+.censored:hover .card-body {
+    visibility: visible;
+    transition: visibility 0 !important;
+    transition-delay: 0 !important;
+}
+
+.censored:hover::after {
+    content: "";
+}
+
+.approved .card-title {
+    color: var(--bs-success)
 }
 
 .card-body {
@@ -68,6 +112,24 @@ h2 {
     --bs-btn-hover-color: var(--bs-primary);
 }
 
-.bi:first-child:not(:only-child) {
-    margin-right: 0.3em;
+.censor-btn {
+    position: relative;
+}
+
+.censor-btn::before {
+    content: '';
+    background-color: var(--bs-primary);
+    position: absolute;
+    transition: width 0.5s linear;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--progress, 0);
+    z-index: 1;
+    opacity: 25%;
+}
+
+.bonus-btn {
+    width: fit-content;
+    flex-grow: 0 !important;
 }
