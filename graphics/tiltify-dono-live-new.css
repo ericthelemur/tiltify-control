@@ -68,6 +68,6 @@ h2 {
     --bs-btn-hover-color: var(--bs-primary);
 }
 
-.bi:first-child {
+.bi:first-child:not(:only-child) {
     margin-right: 0.3em;
 }
