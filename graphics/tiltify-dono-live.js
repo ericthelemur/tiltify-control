@@ -36,7 +36,9 @@ function getAmount(currency, value, disp) {
 const donoElem = document.getElementById("donations");
 const clearDonosElem = document.getElementById("clear-donations");
 const showReadElem = document.getElementById("show-read");
+const showCensoredElem = document.getElementById("show-censored");
 const newestFirstElem = document.getElementById("newest");
+const approveAllElem = document.getElementById("approve-all");
 
 function createIcon(icon, label = undefined) {
     // Create a Bootstrap icon with optional text
@@ -82,8 +84,10 @@ function updateDonoList(newvalue = undefined) {
     var newdonos = [];
     var i = 0;
     if (newestFirstElem.checked) newvalue = newvalue.slice().reverse();
+    if (newvalue.length == 0) newdonos = [createElem("h2", undefined, "No donations yet")]
     for (var dono of newvalue) {
         if (dono.read && !showReadElem.checked) continue;
+        if (dono.modStatus === CENSORED && !showCensoredElem.checked) continue;
         if (i >= 50) {
             newdonos.push(createElem("p", [], "Too many donations, truncating here"));
             break;
@@ -144,7 +148,22 @@ clearDonosElem.addEventListener("click", () => {
     }
 })
 
+approveAllElem.addEventListener("click", () => {
+    var confirmClear = confirm("Are you sure you want to mark all unmoderated donations approved?")
+    if (confirmClear == true) {
+        for (const dono of donationRep.value) {
+            if (dono.modStatus === UNDECIDED) {
+                dono.modStatus = APPROVED;
+            }
+        }
+    }
+})
+
 showReadElem.addEventListener("input", (e) => {
+    updateDonoList();
+})
+
+showCensoredElem.addEventListener("input", (e) => {
     updateDonoList();
 })
 
