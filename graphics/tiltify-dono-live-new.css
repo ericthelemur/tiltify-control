@@ -14,6 +14,26 @@ h2 {
     gap: 0.5rem;
 }
 
+#donations[data-unread="false"] .unread {
+    display: none;
+}
+
+#donations[data-read="false"] .read {
+    display: none;
+}
+
+#donations[data-approved="false"] .approved {
+    display: none;
+}
+
+#donations[data-undecided="false"] .undecided {
+    display: none;
+}
+
+#donations[data-censored="false"] .censored {
+    display: none;
+}
+
 .card {
     --bs-card-spacer-y: 0.5rem;
     --bs-card-spacer-x: 0.75rem;

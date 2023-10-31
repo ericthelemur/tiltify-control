@@ -20,15 +20,24 @@
         <summary class="btn btn-primary"><i class="bi bi-gear-fill"></i></summary>
         <div class="button-row bg-body-secondary rounded p-3  border" style="--bs-bg-opacity: .75;">
             <h5>Local Settings</h5>
-            <span class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="show-read">
-                <label class="form-check-label" for="show-read">Show Read</label>
-            </span>
+            <div class="btn-group" role="group">
+                <input type="checkbox" class="btn-check filter-setting" id="show-unread" autocomplete="off">
+                <label class="btn btn-outline-primary" for="show-unread"><i class="bi bi-envelope-fill"></i></label>
 
-            <span class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="show-censored">
-                <label class="form-check-label" for="show-censored">Show Censored</label>
-            </span>
+                <input type="checkbox" class="btn-check filter-setting" id="show-read" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="show-read"><i class="bi bi-envelope-open-fill"></i></label>
+            </div>
+
+            <div class="btn-group" role="group">
+                <input type="checkbox" class="btn-check filter-setting" id="show-approved" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="show-approved"><i class="bi bi-check-lg"></i></label>
+
+                <input type="checkbox" class="btn-check filter-setting" id="show-undecided" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="show-undecided"><i class="bi bi-question-lg"></i></label>
+
+                <input type="checkbox" class="btn-check filter-setting" id="show-censored" autocomplete="off">
+                <label class="btn btn-outline-primary" for="show-censored"><i class="bi bi-ban"></i></label>
+            </div>
 
             <span class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="newest">

@@ -34,11 +34,27 @@ function getAmount(currency, value, disp) {
 
 // Settings elements
 const donoElem = document.getElementById("donations");
-const clearDonosElem = document.getElementById("clear-donations");
-const showReadElem = document.getElementById("show-read");
-const showCensoredElem = document.getElementById("show-censored");
 const newestFirstElem = document.getElementById("newest");
+const clearDonosElem = document.getElementById("clear-donations");
 const approveAllElem = document.getElementById("approve-all");
+
+const showElems = {};
+const showCategories = ["unread", "read", "approved", "undecided", "censored"];
+for (const key of showCategories) {
+    const elem = document.getElementById("show-" + key);
+    showElems[key] = elem;
+    donoElem.dataset[key] = elem.checked.toString();
+    showElems[key].addEventListener("input", (e) => {
+        donoElem.dataset[key] = elem.checked;
+    });
+}
+
+function canDisplay(dono) {
+    // Filter by read
+    return dono.read ? showElems.read.checked : showElems.unread.checked &&
+        // Filter by mod status
+        tripleState(dono.modStatus, showElems.approved.checked, showElems.undecided.checked, showElems.censored.checked);
+}
 
 function createIcon(icon, label = undefined) {
     // Create a Bootstrap icon with optional text
@@ -68,6 +84,7 @@ function updateDonoList(newvalue = undefined) {
     // This can be triggered with on change or generally
     if (newvalue === undefined) newvalue = donationRep.value;
     console.log("Updating", newvalue)
+    timerButtons = [];
 
     var newexisting = [];
     var newdonos = [];
@@ -75,13 +92,6 @@ function updateDonoList(newvalue = undefined) {
     if (newestFirstElem.checked) newvalue = newvalue.slice().reverse();
     if (newvalue.length == 0) newdonos = [createElem("h2", undefined, "No donations yet")]
     for (var dono of newvalue) {
-        if (dono.read && !showReadElem.checked) continue;
-        if (dono.modStatus === CENSORED && !showCensoredElem.checked) continue;
-        if (i >= 50) {
-            newdonos.push(createElem("p", [], "Too many donations, truncating here"));
-            break;
-        }
-
         // Track if element has moved, if so, disable buttons below for 1s
         const key = moveKey(dono);
         const changed = JSON.stringify(key) !== JSON.stringify(existing[i]);
@@ -146,16 +156,4 @@ approveAllElem.addEventListener("click", () => {
             }
         }
     }
-})
-
-showReadElem.addEventListener("input", (e) => {
-    updateDonoList();
-})
-
-showCensoredElem.addEventListener("input", (e) => {
-    updateDonoList();
-})
-
-newestFirstElem.addEventListener("input", (e) => {
-    updateDonoList();
 })
