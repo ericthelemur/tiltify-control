@@ -117,20 +117,14 @@ h2 {
 }
 
 .censor-btn {
+    --col1: var(--bs-primary);
+    --col2: var(--bs-success);
     position: relative;
+    background: linear-gradient(to right, var(--col2) 0%, var(--col2) var(--progress), var(--col1) var(--progress), var(--col1) 100%);
 }
 
-.censor-btn::before {
-    content: '';
-    background-color: var(--bs-primary);
-    position: absolute;
-    transition: width 0.5s linear;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: var(--progress, 0);
-    z-index: 1;
-    opacity: 25%;
+.censor-btn:hover {
+    --col1: var(--bs-btn-hover-bg);
 }
 
 .bonus-btn {
