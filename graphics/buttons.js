@@ -7,24 +7,25 @@ function tripleState(v, appVal, undecVal, cenVal) {
     return v === APPROVED ? appVal : (v === CENSORED ? cenVal : undecVal);
 }
 
-function modAction(dono) {
-    // Triggers the main mod action (approve/censor)
-    if (nodecg.bundleConfig.donoWhitelist) {
-        // Unknown & censored => accepted, accepted => censored
-        return () => { dono.timeToApprove = 8.64e15; dono.modStatus = tripleState(dono.modStatus, CENSORED, APPROVED, APPROVED) };
-    } else {
-        // Unknown & accepted => censored, censored => accepted
-        return () => { dono.timeToApprove = 8.64e15; dono.modStatus = tripleState(dono.modStatus, CENSORED, CENSORED, APPROVED) };
+function changeModStatus(dono, to) {
+    return () => {
+        dono.timeToApprove = 8.64e15;
+        if (dono.modStatus === CENSORED) {
+            var confirmUncensor = confirm("Are you sure you want to uncensor this donation?" + `\nName: ${dono.donor_name}\nMessage: ${dono.donor_comment}`);
+            if (confirmUncensor != true) return;
+        }
+        dono.modStatus = to;
     }
 }
 
-function bonus(dono) {
+function modAction(dono, defApprove) {
+    // Triggers the main mod action (approve/censor)
+    return changeModStatus(dono, tripleState(dono.modStatus, CENSORED, defApprove ? APPROVED : CENSORED, APPROVED));
+}
+
+function bonus(dono, defApprove) {
     // Triggers the bonus mod action
-    return () => {
-        dono.timeToApprove = 8.64e15;   // Max date
-        const whitelist = nodecg.bundleConfig.donoWhitelist;
-        dono.modStatus = tripleState(dono.modStatus, UNDECIDED, whitelist ? CENSORED : APPROVED, UNDECIDED);
-    }
+    return changeModStatus(dono, tripleState(dono.modStatus, UNDECIDED, defApprove ? CENSORED : APPROVED, UNDECIDED));
 }
 
 function read(dono) {
@@ -36,14 +37,15 @@ function read(dono) {
     }
 }
 
+var timerButtons = [];
 function createButtons(dono, changed) {
     // Main mod action button -- either approve or censor based on mode
     var censorBtn;
-    const whitelist = nodecg.bundleConfig.donoWhitelist;
+    const whitelist = nodecg.bundleConfig.donoWhitelist || dono.timeToApprove === 8.64e15;
     if (whitelist) {
-        censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", "check-lg", "Censor", "ban", modAction(dono), ["rounded-start"]);
+        censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", "check-lg", "Censor", "ban", modAction(dono, dono.modStatus === APPROVED), ["rounded-start"]);
     } else {
-        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", "ban", "Approve", "check-lg", modAction(dono), ["rounded-start"]);
+        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", "ban", "Approve", "check-lg", modAction(dono, dono.modStatus === CENSORED), ["rounded-start"]);
         // censorBtn.classList.replace("btn-primary", "btn-outline-primary");
         // If blacklisting, initiate count to auto-approval
         if (dono.modStatus === UNDECIDED) {
@@ -51,6 +53,7 @@ function createButtons(dono, changed) {
             censorBtn.dataset.timeToApprove = dono.timeToApprove;
             censorBtn.dataset.donoId = dono.id;
             updateCensorBtnTime(censorBtn);
+            timerButtons.push(censorBtn);
         } else {
             censorBtn.classList.replace("btn-primary", "btn-outline-primary");
         }
@@ -61,7 +64,7 @@ function createButtons(dono, changed) {
         createButton(!dono.read, "Read", "envelope-open-fill", "Unread", "envelope-fill", read(dono), ["me-2", "rounded-end"]),
         censorBtn,
         // Bonus mod button (set to the 3rd state, usually reset to undecided)
-        createElem("button", ["btn", "btn-outline-primary", "bonus-btn"], undefined, (e) => e.addEventListener("click", bonus(dono)), [
+        createElem("button", ["btn", "btn-outline-primary", "bonus-btn"], undefined, (e) => e.addEventListener("click", bonus(dono, whitelist)), [
             ...createIcon(tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? "ban" : "check-lg", "arrow-counterclockwise")),
             createElem("small", ["rem-time"])
         ])
@@ -79,8 +82,8 @@ function updateCensorBtnTime(btn) {
     // Move progress bar on auto button
     // Calculate remaining time
     const now = Date.now();
-    if (now > btn.dataset.timeToApprove) return;
-    const target = btn.dataset.timeToApprove;
+    const target = parseInt(btn.dataset.timeToApprove)
+    if (now > target || target === 8.64e15) return;
     const windowSec = nodecg.bundleConfig.blacklistWindowSec;
     const facDone = Math.round((target - now) / (windowSec * 10));
     const facLimit = 100 - Math.max(0, Math.min(100, facDone));
@@ -95,7 +98,8 @@ function updateCensorBtnTime(btn) {
 }
 
 setInterval(() => {
-    for (const btn of document.getElementsByClassName("censor-btn")) {
-        updateCensorBtnTime(btn);
+    for (const btn of timerButtons) {
+        if (btn.dataset.timeToApprove)
+            updateCensorBtnTime(btn);
     }
 }, 250);
