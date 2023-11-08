@@ -41,6 +41,7 @@ function enableAllButtons(state) {
 }
 
 const donoElem = document.getElementById("donations");
+const resetElem = document.getElementById("reset");
 
 // Auto disable buttons on change
 var timeout;
@@ -79,6 +80,7 @@ function settingsCategory(members, prefix, onclick, defaultVal = [], exclusive =
     if (!params.has(prefix)) defaultVal.forEach((v) => params.append(prefix, v));
     const catParams = params.getAll(prefix);
     var elems = {};
+    resetElem.addEventListener("click", () => members.forEach((v) => elems[v].checked = defaultVal.includes(v)));
     for (const key of members) {
         // Record element and set checked status
         const elem = document.getElementById(`${prefix}-${key}`);
@@ -166,7 +168,7 @@ function renderDonation(dono) {
                 ]),
             // Donation body
             // Subtitle
-            createElem("small", ["datetime", "card-subtitle", "text-black-50"], undefined, undefined, [
+            createElem("small", ["datetime", "card-subtitle", "text-body-tertiary"], undefined, undefined, [
                 createElem("span", ["time"], timeFormat.format(date)),
                 createElem("span", [], " "),
                 createElem("span", ["date"], dateFormat.format(date)),

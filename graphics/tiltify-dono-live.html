@@ -9,6 +9,12 @@
             window.location.href = window.location.href;
         }
     }
+
+    function dark() {
+        const curr_light = localStorage.getItem("dark_mode") == "light";
+        document.documentElement.setAttribute('data-bs-theme', curr_light ? "light" : "dark");
+    }
+    dark();
 </script>
 
 <head>
@@ -28,6 +34,11 @@
     <details id="settings" class="m-2">
         <summary class="btn btn-primary"><i class="bi bi-gear-fill"></i></summary>
         <div id="dropdown" class="bg-body-secondary rounded p-3 border mw-100" style="--bs-bg-opacity: .75;">
+            <div class="me-2 float-end" role="group">
+                <button class="btn btn-outline-primary small px-2 py-1" id="reset"><i class="bi bi-arrow-counterclockwise"></i></button>
+                <button class="btn btn-outline-primary small px-2 py-1" id="dark-mode"><i class="bi bi-moon-fill"></i></button>
+            </div>
+
             <h5>Local Settings</h5>
 
             <h6 class="mt-2 mb-0">Donation List</h6>
@@ -91,5 +102,6 @@
 </body>
 <script src="buttons.js"></script>
 <script src="tiltify-dono-live.js"></script>
+<script src="darkmode.js"></script>
 
 </html>
