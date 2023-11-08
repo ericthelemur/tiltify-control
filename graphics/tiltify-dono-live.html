@@ -13,12 +13,11 @@
 
 <head>
     <meta charset="UTF-8">
+    <title>Tiltify Donation Reader</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Mulish:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Mulish:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="uwcs-bootstrap.css">
     <link rel="stylesheet" href="tiltify-dono-live-new.css">
@@ -30,6 +29,19 @@
         <summary class="btn btn-primary"><i class="bi bi-gear-fill"></i></summary>
         <div id="dropdown" class="bg-body-secondary rounded p-3 border mw-100" style="--bs-bg-opacity: .75;">
             <h5>Local Settings</h5>
+
+            <h6 class="mt-2 mb-0">Donation List</h6>
+            <div class="btn-group me-2" role="group">
+                <input type="radio" class="btn-check" name="list" id="list-live" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="list-live"><i class="bi bi-bell-fill"></i> Live</label>
+
+                <input type="radio" class="btn-check" name="list" id="list-all" autocomplete="off">
+                <label class="btn btn-outline-primary" for="list-all"><i class="bi bi-archive-fill"></i> All</label>
+
+                <input type="radio" class="btn-check" name="list" id="list-donors" autocomplete="off">
+                <label class="btn btn-outline-primary" for="list-donors"><i class="bi bi-people-fill"></i> Donors</label>
+            </div>
+
             <h6 class="mb-0">Filters</h6>
             <div class="btn-group me-2" role="group">
                 <input type="checkbox" class="btn-check filter-setting" id="show-unread" autocomplete="off" checked>
@@ -52,7 +64,6 @@
 
             <h6 class="mt-2 mb-0">Sort by</h6>
             <div class="btn-group me-2" role="group">
-
                 <input type="radio" class="btn-check" name="order" id="order-dsc" autocomplete="off" checked>
                 <label class="btn btn-outline-primary" for="order-dsc"><i class="bi bi-arrow-down"></i></label>
 
@@ -74,7 +85,7 @@
         </div>
     </details>
     <div class="container-xxl mt-3">
-        <h1>WASD Donation Reader</h1>
+        <h1>Tiltify Donation Reader</h1>
         <div id="donations"></div>
     </div>
 </body>

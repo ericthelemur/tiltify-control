@@ -15,6 +15,8 @@ function createElem(tag, classes = [], content = undefined, post_hook = undefine
 
 // Replicants used
 var donationRep = nodecg.Replicant("donations", "nodecg-tiltify");
+var allDonationRep = nodecg.Replicant("alldonations", "nodecg-tiltify");
+var donorsRep = nodecg.Replicant("donors", "nodecg-tiltify");
 var approvedDonationsRep = nodecg.Replicant("approvedDonations");
 
 // Display formats
@@ -33,7 +35,6 @@ function getAmount(currency, value, disp) {
 }
 
 function enableAllButtons(state) {
-    console.log("bgs to", state);
     buttonGroups.forEach((btnGroup) =>
         [].forEach.call(btnGroup.children, (e) => e.disabled = state)
     )
@@ -95,6 +96,10 @@ function settingsCategory(members, prefix, onclick, defaultVal = [], exclusive =
 }
 
 // Settings
+
+const listCategories = ["live", "all", "donors"];
+const listElems = settingsCategory(listCategories, "list", () => updateDonoList(), ["live"], true);
+
 const showCategories = ["unread", "read", "approved", "undecided", "censored"];
 const categoryIcons = { "unread": "envelope-open-fill", "read": "envelope-fill", "approved": "check-lg", "undecided": "question-lg", "censored": "ban", "shown": "eye-fill", "unshown": "eye-slash-fill" }
 const showElems = settingsCategory(showCategories, "show", (k, e) => donoElem.dataset[k] = e.checked, ["unread", "approved", "undecided"], false);
@@ -144,7 +149,11 @@ var existing = [];
 var readMsg = [];
 function updateDonoList(newvalue = undefined) {
     // This can be triggered with on change or generally
-    if (newvalue === undefined) newvalue = donationRep.value;
+    if (newvalue === undefined) {
+        if (listElems.live.checked) newvalue = donationRep.value;
+        else if (listElems.all.checked) newvalue = allDonationRep.value;
+        else /* listElems.donors.checked */ newvalue = donorsRep.value;
+    }
     console.log("Updating", newvalue)
     timerButtons = [];
     buttonGroups = [];
@@ -173,24 +182,29 @@ function updateDonoList(newvalue = undefined) {
                 createElem("h2", ["h5", "card-title"], undefined,
                     (e) => { if (dono.shown) e.prepend(createIcon("eye-fill")) },
                     [
-                        createElem("span", ["name"], dono.donor_name),
+                        createElem("span", ["name"], dono.donor_name || dono.name),
                         createElem("span", ["donated"], " donated "),
                         createElem("span", ["amount"], amount[0]),
                         createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
                     ]),
-                // Subtitle with date and status effects
-                createElem("small", ["datetime", "card-subtitle", "text-black-50"], undefined, undefined, [
-                    createElem("span", ["time"], timeFormat.format(date)),
-                    createElem("span", [], " "),
-                    createElem("span", ["date"], dateFormat.format(date)),
-                    createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, [
-                        ...createIcon(dono.read ? categoryIcons.read : categoryIcons.unread),
-                        ...createIcon(dono.shown ? categoryIcons : categoryIcons.unshown),
-                        ...createIcon(tripleState(dono.modStatus, categoryIcons.approved, categoryIcons.undecided, categoryIcons.censored))
-                    ])
-                ]),
-                createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
-                createButtons(dono, changed)
+                ...(!listElems.donors.checked ?
+                    // Donation body
+                    [
+                        // Subtitle
+                        createElem("small", ["datetime", "card-subtitle", "text-black-50"], undefined, undefined, [
+                            createElem("span", ["time"], timeFormat.format(date)),
+                            createElem("span", [], " "),
+                            createElem("span", ["date"], dateFormat.format(date)),
+                            createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, [
+                                ...createIcon(dono.read ? categoryIcons.read : categoryIcons.unread),
+                                ...createIcon(dono.shown ? categoryIcons : categoryIcons.unshown),
+                                ...createIcon(tripleState(dono.modStatus, categoryIcons.approved, categoryIcons.undecided, categoryIcons.censored))
+                            ])
+                        ]),
+                        createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
+                        listElems.live.checked ? createButtons(dono, changed) : createElem("div", []),
+                    ] : []  // No body on donors list
+                )
             ])
         ]));
     }
@@ -201,7 +215,19 @@ function updateDonoList(newvalue = undefined) {
 
 // Update dono list on donation coming in
 donationRep.on("change", function (newvalue, oldvalue) {
-    if (newvalue !== undefined && (oldvalue === undefined || JSON.stringify(newvalue) !== JSON.stringify(oldvalue))) {
+    if (listElems.live.checked && newvalue !== undefined && (oldvalue === undefined || JSON.stringify(newvalue) !== JSON.stringify(oldvalue))) {
+        updateDonoList(newvalue);
+    }
+});
+
+allDonationRep.on("change", function (newvalue, oldvalue) {
+    if (listElems.all.checked && newvalue !== undefined && (oldvalue === undefined || JSON.stringify(newvalue) !== JSON.stringify(oldvalue))) {
+        updateDonoList(newvalue);
+    }
+});
+
+donorsRep.on("change", function (newvalue, oldvalue) {
+    if (listElems.donors.checked && newvalue !== undefined && (oldvalue === undefined || JSON.stringify(newvalue) !== JSON.stringify(oldvalue))) {
         updateDonoList(newvalue);
     }
 });
