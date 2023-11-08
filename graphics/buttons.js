@@ -39,7 +39,7 @@ function read(dono) {
 
 var timerButtons = [];
 var buttonGroups = [];
-function createButtons(dono, changed) {
+function createButtons(dono) {
     // Main mod action button -- either approve or censor based on mode
     var censorBtn;
     const whitelist = nodecg.bundleConfig.donoWhitelist || dono.timeToApprove === 8.64e15;

@@ -8,29 +8,29 @@ h2 {
 }
 
 
-#donations {
+.donations {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(25rem, 100%), 1fr));
     gap: 0.5rem;
 }
 
-#donations[data-unread="false"] .unread {
+.donations[data-unread="false"] .unread {
     display: none;
 }
 
-#donations[data-read="false"] .read {
+.donations[data-read="false"] .read {
     display: none;
 }
 
-#donations[data-approved="false"] .approved {
+.donations[data-approved="false"] .approved {
     display: none;
 }
 
-#donations[data-undecided="false"] .undecided {
+.donations[data-undecided="false"] .undecided {
     display: none;
 }
 
-#donations[data-censored="false"] .censored {
+.donations[data-censored="false"] .censored {
     display: none;
 }
 

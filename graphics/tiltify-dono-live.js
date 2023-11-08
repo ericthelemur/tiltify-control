@@ -145,72 +145,94 @@ function moveKey(dono) {
     return { id: dono.id, read: dono.read, modStatus: dono.modStatus }
 }
 
+function renderDonation(dono) {
+    const amount = getAmount(dono.amount.currency, dono.amount.value, dono.amountDisplay);
+    const date = new Date(dono.completed_at);
+    const cardClasses = ["card", dono.read ? "read" : "unread", tripleState(dono.modStatus, "approved", "undecided", "censored")];
+    return createElem("div", cardClasses, undefined, (e) => {
+        e.id = "dono-" + dono.id;
+        e.dataset.time = -Math.trunc(new Date(dono.completed_at).getTime());
+        e.dataset.money = Math.round(dono.amountDisplay * 100);
+    }, [
+        createElem("div", ["card-body"], undefined, undefined, [
+            // Title with donor and amounts
+            createElem("h2", ["h5", "card-title"], undefined,
+                (e) => { if (dono.shown) e.prepend(createIcon("eye-fill")) },
+                [
+                    createElem("span", ["name"], dono.donor_name),
+                    createElem("span", ["donated"], " donated "),
+                    createElem("span", ["amount"], amount[0]),
+                    createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
+                ]),
+            // Donation body
+            // Subtitle
+            createElem("small", ["datetime", "card-subtitle", "text-black-50"], undefined, undefined, [
+                createElem("span", ["time"], timeFormat.format(date)),
+                createElem("span", [], " "),
+                createElem("span", ["date"], dateFormat.format(date)),
+                createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, "read" in dono ? [
+                    ...createIcon(dono.read ? categoryIcons.read : categoryIcons.unread),
+                    ...createIcon(dono.shown ? categoryIcons : categoryIcons.unshown),
+                    ...createIcon(tripleState(dono.modStatus, categoryIcons.approved, categoryIcons.undecided, categoryIcons.censored))
+                ] : [])
+            ]),
+            createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
+            listElems.live.checked ? createButtons(dono) : createElem("span", []),
+        ])
+    ]);
+}
+
+function renderDonor(donor) {
+    const amount = getAmount(donor.amount.currency, donor.amount.value, donor.amountDisplay);
+    const donos = perDonorDonations[donor.name];
+    const donoElems = (donos ? donos : []).map(renderDonation)
+    return createElem("div", ["card", "w-100"], undefined, (e) => {
+        e.id = "dono-" + donor.id;
+        e.dataset.money = Math.round(donor.amount.value * 100);
+    }, [
+        createElem("div", ["card-body"], undefined, undefined, [
+            // Title with donor and amounts
+            createElem("details", [], undefined, undefined, [
+                createElem("summary", [], undefined, undefined, [
+                    createElem("h2", ["h5", "card-title", "d-inline"], undefined, undefined, [
+                        createElem("span", ["name"], donor.name),
+                        createElem("span", ["donated"], " total "),
+                        createElem("span", ["amount"], amount[0]),
+                        createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
+                    ]),
+                ]),
+                createElem("div", ["donations"], undefined, undefined, donoElems)
+            ])
+        ])
+    ]);
+}
+
 var existing = [];
 var readMsg = [];
+var perDonorDonations = {};
 function updateDonoList(newvalue = undefined) {
     // This can be triggered with on change or generally
     if (newvalue === undefined) {
+        console.log(listElems.live.checked, listElems.all.checked, listElems.donors.checked);
         if (listElems.live.checked) newvalue = donationRep.value;
         else if (listElems.all.checked) newvalue = allDonationRep.value;
-        else /* listElems.donors.checked */ newvalue = donorsRep.value;
+        else /*if (listElems.donors.checked)*/ newvalue = donorsRep.value;
     }
+
     console.log("Updating", newvalue)
     timerButtons = [];
     buttonGroups = [];
 
-    var newexisting = [];
     var newdonos = [];
-    var i = 0;
     if (newvalue.length == 0) newdonos = [createElem("h2", undefined, "No donations yet")]
+
+    if (listElems.donors.checked) donoElem.classList.add("d-block")
+    else donoElem.classList.remove("d-block")
+
     for (var dono of newvalue) {
-        // Track if element has moved, if so, disable buttons below for 1s
-        const key = moveKey(dono);
-        const changed = JSON.stringify(key) !== JSON.stringify(existing[i]);
-        newexisting.push(key);
-        i++;
-
-        const amount = getAmount(dono.amount.currency, dono.amount.value, dono.amountDisplay);
-        const date = new Date(dono.completed_at);
-        const cardClasses = ["card", dono.read ? "read" : "unread", tripleState(dono.modStatus, "approved", "undecided", "censored")];
-        newdonos.push(createElem("div", cardClasses, undefined, (e) => {
-            e.id = "dono-" + dono.id;
-            e.dataset.time = -Math.trunc(new Date(dono.completed_at).getTime());
-            e.dataset.money = Math.round(dono.amountDisplay * 100);
-        }, [
-            createElem("div", ["card-body"], undefined, undefined, [
-                // Title with donor and amounts
-                createElem("h2", ["h5", "card-title"], undefined,
-                    (e) => { if (dono.shown) e.prepend(createIcon("eye-fill")) },
-                    [
-                        createElem("span", ["name"], dono.donor_name || dono.name),
-                        createElem("span", ["donated"], " donated "),
-                        createElem("span", ["amount"], amount[0]),
-                        createElem("span", ["amount", "amount-gbp"], amount[1] ? ` (${amount[1]})` : ""),
-                    ]),
-                ...(!listElems.donors.checked ?
-                    // Donation body
-                    [
-                        // Subtitle
-                        createElem("small", ["datetime", "card-subtitle", "text-black-50"], undefined, undefined, [
-                            createElem("span", ["time"], timeFormat.format(date)),
-                            createElem("span", [], " "),
-                            createElem("span", ["date"], dateFormat.format(date)),
-                            createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, [
-                                ...createIcon(dono.read ? categoryIcons.read : categoryIcons.unread),
-                                ...createIcon(dono.shown ? categoryIcons : categoryIcons.unshown),
-                                ...createIcon(tripleState(dono.modStatus, categoryIcons.approved, categoryIcons.undecided, categoryIcons.censored))
-                            ])
-                        ]),
-                        createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),
-                        listElems.live.checked ? createButtons(dono, changed) : createElem("div", []),
-                    ] : []  // No body on donors list
-                )
-            ])
-        ]));
+        newdonos.push(listElems.donors.checked ? renderDonor(dono) : renderDonation(dono));
     }
-
     resort(newdonos);
-    existing = newexisting;
 }
 
 // Update dono list on donation coming in
@@ -221,8 +243,14 @@ donationRep.on("change", function (newvalue, oldvalue) {
 });
 
 allDonationRep.on("change", function (newvalue, oldvalue) {
-    if (listElems.all.checked && newvalue !== undefined && (oldvalue === undefined || JSON.stringify(newvalue) !== JSON.stringify(oldvalue))) {
-        updateDonoList(newvalue);
+    if (newvalue !== undefined && (oldvalue === undefined || JSON.stringify(newvalue) !== JSON.stringify(oldvalue))) {
+        if (listElems.all.checked) updateDonoList(newvalue);
+        perDonorDonations = {};
+        for (const dono of newvalue) {
+            const key = dono.donor_name;
+            if (!(key in perDonorDonations)) perDonorDonations[key] = [];
+            perDonorDonations[key].push(dono);
+        }
     }
 });
 
