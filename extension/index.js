@@ -7,6 +7,7 @@ module.exports = function (nodecg) {
     }
 
     const approvedDonationsRep = nodecg.Replicant("approvedDonations", { persistent: true, defaultValue: [] });
+    const settingsRep = nodecg.Replicant("settings", { persistent: true, defaultValue: { "autoapprove": false } });
     const donationsRep = nodecg.Replicant("donations", "nodecg-tiltify");
 
     var conversionRates = {};
@@ -34,7 +35,7 @@ module.exports = function (nodecg) {
     donationsRep.on("change", (newval, oldval) => {
         convertAmounts();
 
-        if (nodecg.bundleConfig.donoWhitelist) {
+        if (settingsRep.value.autoapprove) {
             // Ensure auto approve date is never hit (so can switch to blacklist safely)
             for (const dono of newval) {
                 if (dono.timeToApprove != 8.64e15) {
@@ -46,7 +47,7 @@ module.exports = function (nodecg) {
             for (const dono of newval) {
                 if (dono.timeToApprove === undefined) {
                     // Don't countdown if just booting
-                    dono.timeToApprove = oldval === undefined ? 8.64e15 : now + nodecg.bundleConfig.blacklistWindowSec * 1000;
+                    dono.timeToApprove = oldval === undefined ? 8.64e15 : now + nodecg.bundleConfig.autoApproveTimeSec * 1000;
                 }
             }
         }
@@ -56,7 +57,7 @@ module.exports = function (nodecg) {
         // }
     })
 
-    if (!nodecg.bundleConfig.donoWhitelist) {
+    if (!settingsRep.value.autoapprove) {
         // If blacklist, poll for the approval time passing
         setInterval(() => {
             const now = Date.now();

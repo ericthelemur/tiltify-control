@@ -12,13 +12,8 @@
             "type": "string",
             "default": ""
         },
-        "donoWhitelist": {
-            "description": "If true, waits for donos to be approved on reader to display. If false, gives a 15s window to censor",
-            "type": "boolean",
-            "default": false
-        },
-        "blacklistWindowSec": {
-            "description": "Delay in displaying donation to give time to censor, in seconds",
+        "autoApproveTimeSec": {
+            "description": "Delay between dono being recieved and auto approval, only if enabled",
             "type": "number",
             "default": 15
         }
