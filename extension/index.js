@@ -28,12 +28,10 @@ module.exports = function (nodecg) {
         .then((r) => r.json())
         .then((j) => {
             conversionRates = j.data;
-            console.log(conversionRates);
             convertAmounts();
         });
 
     donationsRep.on("change", (newval, oldval) => {
-        console.log("changed donations", newval[0]);
         convertAmounts();
 
         if (nodecg.bundleConfig.donoWhitelist) {
@@ -47,8 +45,7 @@ module.exports = function (nodecg) {
             const now = Date.now();
             for (const dono of newval) {
                 if (dono.timeToApprove === undefined) {
-                    // Don't countdown if fresh
-                    nodecg.log.info("Starting " + dono.id);
+                    // Don't countdown if just booting
                     dono.timeToApprove = oldval === undefined ? 8.64e15 : now + nodecg.bundleConfig.blacklistWindowSec * 1000;
                 }
             }
