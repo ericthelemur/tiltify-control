@@ -42,12 +42,12 @@ var buttonGroups = [];
 function createButtons(dono) {
     // Main mod action button -- either approve or censor based on mode
     var censorBtn;
-    const whitelist = settingsRep.value.autoapprove || dono.timeToApprove === 8.64e15;
+    const whitelist = !settingsRep.value.autoapprove || dono.timeToApprove === 8.64e15;
     if (whitelist) {
         censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", icons.approved, "Censor", icons.censored,
             modAction(dono, dono.modStatus === APPROVED), ["rounded-start"]);
     } else {
-        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", icons.censor, "Approve", icons.approved,
+        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", icons.censored, "Approve", icons.approved,
             modAction(dono, dono.modStatus === CENSORED), ["rounded-start"]);
 
         // If blacklisting, initiate count to auto-approval

@@ -12,15 +12,21 @@ module.exports = function (nodecg) {
 
     var conversionRates = {};
 
+    function convertAmount(dono) {
+        console.log("Converting", dono.id);
+        if (conversionRates && dono.amount.currency in conversionRates) {
+            dono.amountDisplay = dono.amount.value / conversionRates[dono.amount.currency]
+        } else if (dono.amount.currency == nodecg.bundleConfig.displayCurrency) {
+            // If rates not provided, can do trivial conversion
+            dono.amountDisplay = dono.amount.value
+        }
+    }
+
     function convertAmounts() {
+        nodecg.log.info("Converting rates");
         for (var dono of donationsRep.value) {
             if (dono.amountDisplay === undefined) {
-                if (conversionRates && dono.amount.currency in conversionRates) {
-                    dono.amountDisplay = dono.amount.value / conversionRates[dono.amount.currency]
-                } else if (dono.amount.currency == nodecg.bundleConfig.displayCurrency) {
-                    // If rates not provided, can do trivial conversion
-                    dono.amountDisplay = dono.amount.value
-                }
+                convertAmount(dono);
             }
         }
     }
@@ -29,37 +35,36 @@ module.exports = function (nodecg) {
         .then((r) => r.json())
         .then((j) => {
             conversionRates = j.data;
+            nodecg.log.info("Conversion rates loaded, converting");
             convertAmounts();
         });
 
-    donationsRep.on("change", (newval, oldval) => {
-        convertAmounts();
+    const nodecgTiltify = nodecg.extensions['nodecg-tiltify'];
+    nodecgTiltify.newDonoHooks.push(convertAmount);
 
-        if (settingsRep.value.autoapprove) {
-            // Ensure auto approve date is never hit (so can switch to blacklist safely)
-            for (const dono of newval) {
-                if (dono.timeToApprove != 8.64e15) {
-                    dono.timeToApprove = 8.64e15;
-                }
+    nodecgTiltify.newDonoHooks.push(dono => {
+        if (!settingsRep.value.autoapprove) {
+            nodecg.log.info("Clearing ToA");
+            if (dono.timeToApprove != 8.64e15) {
+                dono.timeToApprove = 8.64e15;
             }
         } else {    // Blacklist, mark auto approval time
+            nodecg.log.info("Setting ToA");
             const now = Date.now();
-            for (const dono of newval) {
-                if (dono.timeToApprove === undefined) {
-                    // Don't countdown if just booting
-                    dono.timeToApprove = oldval === undefined ? 8.64e15 : now + nodecg.bundleConfig.autoApproveTimeSec * 1000;
-                }
-            }
+            // Don't countdown if just booting
+            dono.timeToApprove = now + nodecg.bundleConfig.autoApproveTimeSec * 1000;
         }
-        // const approvedDonos = donationsRep.value.filter((d) => d.approved);
-        // if (!equivListOfObjects(approvedDonos, approvedDonationsRep.value)) {
-        //     approvedDonationsRep.value = approvedDonos;
-        // }
     })
 
-    if (!settingsRep.value.autoapprove) {
-        // If blacklist, poll for the approval time passing
-        setInterval(() => {
+    // On launch, don't let any auto approve
+    for (const dono of donationsRep.value) {
+        dono.timeToApprove = 8.64e15;
+    }
+
+
+    // If blacklist, poll for the approval time passing
+    setInterval(() => {
+        if (settingsRep.value.autoapprove) {
             const now = Date.now();
             for (const dono of donationsRep.value) {
                 if (dono.modStatus === undefined && dono.timeToApprove < now) {
@@ -67,7 +72,6 @@ module.exports = function (nodecg) {
                     dono.modStatus = true;
                 }
             }
-        }, 1000)
-
-    }
+        }
+    }, 1000)
 };

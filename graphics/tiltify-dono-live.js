@@ -222,7 +222,6 @@ function updateDonoList(newvalue = undefined) {
     const listElems = localSettings.list.elems;
     // This can be triggered with on change or generally
     if (newvalue === undefined) {
-        console.log(listElems.live.checked, listElems.all.checked, listElems.donors.checked);
         if (listElems.live.checked) newvalue = donationRep.value;
         else if (listElems.all.checked) newvalue = allDonationRep.value;
         else /*if (listElems.donors.checked)*/ newvalue = donorsRep.value;
@@ -253,6 +252,7 @@ function resort(children = undefined) {
 }
 
 NodeCG.waitForReplicants(settingsRep, donationRep, allDonationRep, donorsRep).then(() => {
+    updateDonoList();
     // Update dono list on donation coming in
     donationRep.on("change", function (newvalue, oldvalue) {
         if (localSettings.list.elems.live.checked && newvalue !== undefined && (oldvalue === undefined || JSON.stringify(newvalue) !== JSON.stringify(oldvalue))) {
@@ -285,11 +285,11 @@ NodeCG.waitForReplicants(settingsRep, donationRep, allDonationRep, donorsRep).th
     });
 
     autoApproveElem.addEventListener("click", () => {
-        if (settingsRep.value && autoApproveElem.checked != settingsRep.value.autoapprove) {
-            autoApproveElem.checked = settingsRep.value.autoapprove;
+        if (autoApproveElem.checked != settingsRep.value.autoapprove) {
+            settingsRep.value.autoapprove = autoApproveElem.checked;
         }
     })
-    autoApproveElem.disabled = false;
+    // autoApproveElem.disabled = false;
 
 
     const clearDonosElem = document.getElementById("clear-donations");
