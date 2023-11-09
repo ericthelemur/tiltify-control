@@ -44,11 +44,11 @@ function createButtons(dono) {
     var censorBtn;
     const whitelist = !settingsRep.value.autoapprove || dono.timeToApprove === 8.64e15;
     if (whitelist) {
-        censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", icons.approved, "Censor", icons.censored,
-            modAction(dono, dono.modStatus === APPROVED), ["rounded-start"]);
+        censorBtn = createButton(dono.modStatus !== APPROVED, "Approve", icons.approved, "Censor", icons.censored, undefined, ["rounded-start"]);
+        censorBtn.addEventListener("click", dono.modStatus !== APPROVED ? changeModStatus(dono, APPROVED) : changeModStatus(dono, CENSORED));
     } else {
-        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", icons.censored, "Approve", icons.approved,
-            modAction(dono, dono.modStatus === CENSORED), ["rounded-start"]);
+        censorBtn = createButton(dono.modStatus !== CENSORED, "Censor", icons.censored, "Approve", icons.approved, undefined, ["rounded-start"]);
+        censorBtn.addEventListener("click", dono.modStatus !== CENSORED ? changeModStatus(dono, CENSORED) : changeModStatus(dono, APPROVED));
 
         // If blacklisting, initiate count to auto-approval
         if (dono.modStatus === UNDECIDED) {

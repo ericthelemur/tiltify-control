@@ -1,18 +1,3 @@
-// Helper function to create nested div structure
-// Many JS frameworks have similar, but keeping no dependencies
-function createElem(tag, classes = [], content = undefined, post_hook = undefined, children = []) {
-    const elem = document.createElement(tag);
-    for (const c of classes) {
-        elem.classList.add(c);
-    }
-    if (content) elem.innerText = content;
-    for (const ch of children) {
-        elem.appendChild(ch);
-    }
-    if (post_hook) post_hook(elem);
-    return elem;
-}
-
 // Display formats
 const displayCurrFormat = new Intl.NumberFormat(undefined, { style: 'currency', currency: nodecg.bundleConfig.displayCurrency });
 const baseCurrFormat = (curr) => new Intl.NumberFormat(undefined, { style: 'currency', currency: curr });
@@ -135,14 +120,6 @@ resetElem.addEventListener("click", () => {
     window.location.href = url.href;
 })
 
-
-function createIcon(icon, label = undefined) {
-    // Create a Bootstrap icon with optional text
-    const i = [createElem("i", ["bi", "bi-" + icon])];
-    if (label) i.push(createElem("span", [], " " + label))
-    return i;
-}
-
 function createButton(toggle, textTrue, iconTrue, textFalse, iconFalse, onclick = undefined, classes = []) {
     // Create toggle button with icon & text
     const button = createElem("button", ["btn", toggle ? "btn-primary" : "btn-outline-primary"], undefined, undefined,
@@ -165,7 +142,7 @@ function renderDonation(dono) {
         createElem("div", ["card-body"], undefined, undefined, [
             // Title with donor and amounts
             createElem("h2", ["h5", "card-title"], undefined,
-                (e) => { if (dono.shown) e.prepend(createIcon("eye-fill")) },
+                (e) => { if (dono.shown) e.prepend(createIcon("eye-fill")[0]) },
                 [
                     createElem("span", ["name"], dono.donor_name),
                     createElem("span", ["donated"], " donated "),
@@ -180,7 +157,7 @@ function renderDonation(dono) {
                 createElem("span", ["date"], dateFormat.format(date)),
                 createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, "read" in dono ? [
                     ...createIcon(dono.read ? icons.read : icons.unread),
-                    ...createIcon(dono.shown ? icons : icons.unshown),
+                    ...createIcon(dono.shown ? icons.shown : icons.unshown),
                     ...createIcon(tripleState(dono.modStatus, icons.approved, icons.undecided, icons.censored))
                 ] : [])
             ]),
