@@ -6,15 +6,15 @@ const toastsElem = document.getElementById("toasts");
 
 function toast(dono) {
     const elem = createElem("div", ["toast"], undefined, undefined, [
-        createElem("div", ["toast-header"], undefined, undefined, [
-            createElem("h2", [], undefined, undefined, [
-                ...createIcon("piggy-bank-fill"),
+        createElem("div", ["toast-body"], undefined, undefined, [
+            createElem("h6", [], undefined, undefined, [
+                createIcon("piggy-bank-fill"),
                 createElem("b", [], dono.donor_name),
                 createElem("span", ["donated"], " donated "),
                 createElem("b", ["me-auto"], displayCurrFormat.format(dono.amountDisplay))
-            ])
-        ]),
-        createElem("div", ["toast-body"], dono.donor_comment)
+            ]),
+            createElem("div", [], dono.donor_comment)
+        ])
     ])
     toastsElem.appendChild(elem);
     const toast = bootstrap.Toast.getOrCreateInstance(elem);

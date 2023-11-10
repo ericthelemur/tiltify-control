@@ -15,7 +15,8 @@ function createElem(tag, classes = [], content = undefined, post_hook = undefine
 
 function createIcon(icon, label = undefined) {
     // Create a Bootstrap icon with optional text
-    const i = [createElem("i", ["bi", "bi-" + icon])];
-    if (label) i.push(createElem("span", [], " " + label))
+
+    const i = createElem("span", [], undefined, undefined, [createElem("i", ["bi", "bi-" + icon])]);
+    if (label) i.appendChild(createElem("span", [], " " + label))
     return i;
 }

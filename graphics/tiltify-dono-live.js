@@ -123,7 +123,7 @@ resetElem.addEventListener("click", () => {
 function createButton(toggle, textTrue, iconTrue, textFalse, iconFalse, onclick = undefined, classes = []) {
     // Create toggle button with icon & text
     const button = createElem("button", ["btn", toggle ? "btn-primary" : "btn-outline-primary"], undefined, undefined,
-        createIcon(toggle ? iconTrue : iconFalse, toggle ? textTrue : textFalse)
+        [createIcon(toggle ? iconTrue : iconFalse, toggle ? textTrue : textFalse)]
     );
     if (onclick) button.addEventListener("click", onclick);
     classes.forEach((c) => button.classList.add(c));
@@ -142,7 +142,7 @@ function renderDonation(dono) {
         createElem("div", ["card-body"], undefined, undefined, [
             // Title with donor and amounts
             createElem("h2", ["h5", "card-title"], undefined,
-                (e) => { if (dono.shown) e.prepend(createIcon("eye-fill")[0]) },
+                (e) => { if (dono.shown) e.prepend(createIcon(icons.shown, " ")); if (dono.read) e.prepend(createIcon(icons.read, " ")) },
                 [
                     createElem("span", ["name"], dono.donor_name),
                     createElem("span", ["donated"], " donated "),
@@ -156,9 +156,9 @@ function renderDonation(dono) {
                 createElem("span", [], " "),
                 createElem("span", ["date"], dateFormat.format(date)),
                 createElem("div", ["statuses", "d-inline-flex", "gap-2", "ms-2"], undefined, undefined, "read" in dono ? [
-                    ...createIcon(dono.read ? icons.read : icons.unread),
-                    ...createIcon(dono.shown ? icons.shown : icons.unshown),
-                    ...createIcon(tripleState(dono.modStatus, icons.approved, icons.undecided, icons.censored))
+                    createIcon(dono.read ? icons.read : icons.unread),
+                    createIcon(dono.shown ? icons.shown : icons.unshown),
+                    createIcon(tripleState(dono.modStatus, icons.approved, icons.undecided, icons.censored))
                 ] : [])
             ]),
             createElem("p", ["message", "card-text"], dono.donor_comment || "No Message"),

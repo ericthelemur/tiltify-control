@@ -68,7 +68,7 @@ function createButtons(dono) {
         censorBtn,
         // Bonus mod button (set to the 3rd state, usually reset to undecided)
         createElem("button", ["btn", "btn-outline-primary", "bonus-btn"], undefined, (e) => e.addEventListener("click", bonus(dono, whitelist)), [
-            ...createIcon(tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? icons.censored : icons.approved, "arrow-counterclockwise")),
+            createIcon(tripleState(dono.modStatus, "arrow-counterclockwise", whitelist ? icons.censored : icons.approved, "arrow-counterclockwise")),
             createElem("small", ["rem-time"])
         ])
     ]);
