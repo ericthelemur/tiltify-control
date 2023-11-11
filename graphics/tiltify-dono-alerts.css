@@ -1,0 +1,28 @@
+.toast {
+    overflow: hidden;
+    display: block !important;
+    transition: height 0.2s linear, margin-bottom 0.2s linear, border-width 0.2s linear, opacity 0.2s ease-in;
+    opacity: 0;
+    margin-bottom: 0 !important;
+    border-width: 0;
+}
+
+.toast h6 {
+    margin-bottom: 0;
+}
+
+.show {
+    opacity: 1 !important;
+    border-width: var(--bs-toast-border-width);
+}
+
+.show:not(:last-child) {
+    margin-bottom: var(--bs-toast-spacing) !important;
+}
+
+.msg {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

@@ -8,8 +8,9 @@ function toast(dono) {
     const elem = createElem("div", ["toast"], undefined, undefined, [
         createElem("div", ["toast-body"], undefined, undefined, [
             createElem("h6", [], undefined, undefined, [
-                createIcon("piggy-bank-fill"),
-                createElem("b", [], dono.donor_name),
+                createElem("b", [], undefined, undefined, [
+                    createIcon("star-fill", dono.donor_name),
+                ]),
                 createElem("span", ["donated"], " donated "),
                 createElem("b", [], displayCurrFormat.format(dono.amountDisplay))
             ]),
