@@ -11,14 +11,27 @@ function toast(dono) {
                 createIcon("piggy-bank-fill"),
                 createElem("b", [], dono.donor_name),
                 createElem("span", ["donated"], " donated "),
-                createElem("b", ["me-auto"], displayCurrFormat.format(dono.amountDisplay))
+                createElem("b", [], displayCurrFormat.format(dono.amountDisplay))
             ]),
-            createElem("div", [], dono.donor_comment)
+            createElem("div", ["msg"], dono.donor_comment)
         ])
     ])
+    elem.style.height = "0px";
     toastsElem.appendChild(elem);
-    const toast = bootstrap.Toast.getOrCreateInstance(elem);
-    toast.show();
+
+    // Start grow anim
+    setTimeout(() => {
+        elem.classList.add("show")
+        elem.style.height = elem.firstChild.clientHeight + "px";
+    }, 100);
+
+    // Start shrink anim
+    setTimeout(() => {
+        elem.classList.remove("show");
+        elem.style.height = "0px";
+        setTimeout(() => elem.remove(), 210);
+    }, 5000);
+
     dono.shown = true;
 }
 
