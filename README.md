@@ -1,3 +1,5 @@
+> Project superseded by [ericthelemur/nodecg-dono-control](https://github.com/ericthelemur/nodecg-dono-control) - a rewrite in React
+
 # tiltify-control
 
 Tiltify Control provides a donation reader and moderation interface for Tiltify Donations. Both as a reliable donation reader and to allow approval/censorship of donation messages before they are shown on stream. 
